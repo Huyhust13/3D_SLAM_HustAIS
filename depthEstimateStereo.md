@@ -134,3 +134,4 @@ https://medium.com/@kapilvarshney/how-to-setup-ubuntu-16-04-with-cuda-gpu-and-ot
 3. Cài các gói cần thiết: 
 `pip install -r requirements.txt`
 - Kiểm chứng kết quả đo???
+
