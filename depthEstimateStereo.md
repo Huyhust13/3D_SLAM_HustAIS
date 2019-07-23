@@ -114,6 +114,9 @@ Dữ liệu:
 4. Kết nối với object detection
 3. Nối thông từ chạy ảnh stereo ra depth.
 
+Work-flow:
+<img align="center" src="https://raw.githubusercontent.com/Huyhust13/3D_SLAM_HustAIS/master/figures/work-fl.png">
+
 ## Triển khai:
 
 ## Khó khăn hiện tại
