@@ -173,7 +173,7 @@ Sử dụng model đã train sẵn: [KITTI](https://s3-eu-west-1.amazonaws.com/d
 
 Chạy `python test.py` với model kitti.h5 và ảnh từ KITTI dataset (phải resize về 348x1248)
 
-
+---
 ### Thắc mắc:
 - Input: 
     - Model train sẵn
