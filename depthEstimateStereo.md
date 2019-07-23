@@ -10,6 +10,7 @@ Trong bài này, việc việc khớp gwiax hai điểm được xem xét bằng
 - Sự khác nhau trong vị trí của các ddierm trong các mặt phẳng ảnh là *disparity* của điểm đó.
 - Matching block size là một thông số quan trọng ảnh hưởng tới kết quả của việc ước tính disparity. Block nhỏ hơn có thể tìm kiếm chi tiết tốt hơn, nhưng dễ có lỗi, trong khi block lớn hơn thì robust hơn nhưng lại bỏ qua các chi tiết nhỏ. 
 
+
 ### Depth from disparity
 - Disparity không giống depth.
 Bỗi quan hệ giữa disparity và depth dựa trên cấu hình camera 
@@ -25,7 +26,7 @@ Bỗi quan hệ giữa disparity và depth dựa trên cấu hình camera
     - F - Focal length in world units, typically expressed in millimeters.  
     - (px,py) — Size of the pixel in world units.
 
-Ví dụ:
+#### Ví dụ:
 ```
 *To obtain depth, you need to convert disparity using the following formula:
 depth = baseline * focal / disparity
@@ -34,9 +35,12 @@ The relative disparity outputted by the model has to be scaled by 1242 which is 
 The final formula is:
 depth = 0.54 * 721 / (1242 * disp)*
 ```
+<img align="center" src="https://raw.githubusercontent.com/Huyhust13/3D_SLAM_HustAIS/master/figures/vd_depthCitycapes.png">
 
 Các vấn đề:
-- Phải đọc được đúng định dạng dữ liệu từ disparity map
+- Phải đọc được đúng định dạng dữ liệu từ disparity map. 
+    Giá trị maximum của disparity thể hiện bằng D.
+    Với PSMNet thì Maximum disparity là 192 ==> Quy định định dạng biến đọc từ opencv.
 - Tìm được đúng thông số camera (đơn vị đo của thông số)
 
 
@@ -82,7 +86,12 @@ Dữ liệu:
 - Ảnh disparity
 - Ảnh depth
 
-==> Sử dụng tập Stereo_train_001 (4.4GB) có đầy đủ thông tin trên để tính depth, nhưng bộ dữ liệu này không có ảnh depth được tính sẵn.
+==> Tập Stereo_train_001 (4.4GB) có đầy đủ thông tin trên để tính depth, nhưng bộ dữ liệu này không có ảnh depth được tính sẵn.
+intrinsic.txt
+```
+K = [2301.3147, 0, 1489.8536; 0, 2301.3147, 479.1750; 0, 0, 1]
+```
+==> focal = 2301.3147 (pixel)
 
 
 2. Cityscapes 
@@ -106,11 +115,6 @@ Dữ liệu:
 3. Nối thông từ chạy ảnh stereo ra depth.
 
 ## Triển khai:
-intrinsic.txt
-```
-K = [2301.3147, 0, 1489.8536; 0, 2301.3147, 479.1750; 0, 0, 1]
-```
-==> focal = 2301.3147 (pixel)
 
 ## Khó khăn hiện tại
 - Khó xác định baseline và focal của hệ thống stereo
@@ -118,7 +122,7 @@ K = [2301.3147, 0, 1489.8536; 0, 2301.3147, 479.1750; 0, 0, 1]
 
 
 ## Một số opensource
-### [PMSNet](https://github.com/JiaRenChang/PSMNet)
+### [PSMNet](https://github.com/JiaRenChang/PSMNet)
 - Thử chạy file submission.py với dữ liệu đã train sẵn *.tar
 - Hi vọng có thể sử dụng mô hình đã train, chế biến lại code submission.py để  dùng luôn.
 
@@ -126,6 +130,39 @@ K = [2301.3147, 0, 1489.8536; 0, 2301.3147, 479.1750; 0, 0, 1]
 - Code submission.py đang chạy trên cuda, gặp một số lỗi khi chạy trên cpu
 
 --> Code này cần CUDA
+
+Train PSMNet:
+- KITTY15: bộ ảnh thật, dataset street view từ xe ô tô. Chứa 200 ảnh stereo khớp với ảnh disparity ground-truth thưa dùng LiDAR và 200 ảnh test khác không có ảnh LiDAR. Kích thước ảnh 376*1240
+
+```
+The PSMNet architecture was implemented using PyTorch. All models were end-to-end trained with Adam
+(β1 = 0:9; β2 = 0:999). We performed color normalization on the entire dataset for data preprocessing. During
+training, images were randomly cropped to size H = 256
+and W = 512. The maximum disparity (D) was set to 192.
+We trained our models from scratch using the Scene Flow
+dataset with a constant learning rate of 0.001 for 10 epochs.
+For Scene Flow, the trained model was directly used for
+testing. For KITTI, we used the model trained with Scene
+Flow data after fine-tuning on the KITTI training set for 300
+epochs. The learning rate of this fine-tuning began at 0.001
+for the first 200 epochs and 0.0001 for the remaining 100
+epochs. The batch size was set to 12 for the training on four
+nNvidia Titan-Xp GPUs (each of 3). The training process
+took about 13 hours for Scene Flow dataset and 5 hours for
+KITTI datasets. Moreover, we prolonged the training process to 1000 epochs to obtain the final model and the test
+results for KITTI submission.
+```
+
+- Dữ liệu để sử dụng với model pre-trained cần có H và W chia hết cho 32.
+`If you use your own dataset, the width and height of image should be divisible by 32.`
+
+- Ảnh disparity map tương ứng với ảnh trái.
+    `For the pixel (x; y) in the
+left image, if its corresponding point is found at (x − d; y)
+in the right image, then the depth of this pixel is calculated
+by fB d , where f is the camera's focal length and B is the
+distance between two camera centers.`
+
 
 ### [DenseDepth](https://github.com/ialhashim/DenseDepth)
 12/7/2019: 
