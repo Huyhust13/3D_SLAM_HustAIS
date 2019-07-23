@@ -14,6 +14,16 @@ Trong bài này, việc việc khớp gwiax hai điểm được xem xét bằng
 - Disparity không giống depth.
 Bỗi quan hệ giữa disparity và depth dựa trên cấu hình camera 
 - Công thức: `depth = baseline * focal / disparity`
+![cong thuc](https://raw.githubusercontent.com/Huyhust13/3D_SLAM_HustAIS/master/figures/stereo_depth.png?token=AIFPE4M3KDRG46SAVAXI7O25GZ4LU) 
+
+
+    - (fx,fy) - Focal length in pixels.  
+
+        * fx=F/px  
+        * fy=F/py  
+
+    - F - Focal length in world units, typically expressed in millimeters.  
+    - (px,py) — Size of the pixel in world units.
 
 Ví dụ:
 ```
@@ -24,6 +34,11 @@ The relative disparity outputted by the model has to be scaled by 1242 which is 
 The final formula is:
 depth = 0.54 * 721 / (1242 * disp)*
 ```
+
+Các vấn đề:
+- Phải đọc được đúng định dạng dữ liệu từ disparity map
+- Tìm được đúng thông số camera (đơn vị đo của thông số)
+
 
 ## Phương pháp
 1. Dùng bộ dữ liệu stereo (ApolloDataset hoặc CityscapesDataset), chạy qua PSMNet để ra dispiraty map.
@@ -79,6 +94,10 @@ Dữ liệu:
 - Có disparity
 - Có thông số camera
 - Không có ảnh depth có sẵn
+
+- Thông số camera:
+    - disparity precomputed disparity depth maps. To obtain the disparity values, compute for each pixel p with p > 0: d = ( float(p) - 1. ) / 256., while a value p = 0 is an invalid measurement. Warning: the images are stored as 16-bit pngs, which is non-standard and not supported by all libraries.
+
 
 ## Các bước dự kiến
 1. Chạy lại file submission.py chạy mạng PSMNet để ra disparity map.
