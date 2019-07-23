@@ -16,8 +16,13 @@ def is_image_file(filename):
 
 def dataloader(filepath):
 
+# KITTY
   left_fold  = 'image_2/'
   right_fold = 'image_3/'
+
+# Cityscapes
+#   left_fold  = 'Left/'
+#   right_fold = 'Right/'
 
 
   image = [img for img in os.listdir(filepath+left_fold) if img.find('_10') > -1]
