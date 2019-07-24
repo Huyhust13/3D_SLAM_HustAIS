@@ -48,6 +48,11 @@ if args.KITTI == '2015':
 else:
    from dataloader import KITTI_submission_loader2012 as DA  
 
+def trace(args = "trace here!", _exit = True):
+    print("[DEBUG]" + args)
+    if _exit:
+        exit()
+# trace (args.datapath, True)
 
 test_left_img, test_right_img = DA.dataloader(args.datapath)
 
@@ -59,6 +64,7 @@ else:
     print('no model')
 
 model = nn.DataParallel(model, device_ids=[0])
+# trace("model cuda")
 model.cuda()
 
 if args.loadmodel is not None:
@@ -68,6 +74,7 @@ if args.loadmodel is not None:
 print('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
 
 def test(imgL,imgR):
+        print 
         model.eval()
 
         if args.cuda:
