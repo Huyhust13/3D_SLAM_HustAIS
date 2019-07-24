@@ -17,18 +17,20 @@ def is_image_file(filename):
 def dataloader(filepath):
 
 # KITTY
-  left_fold  = 'image_2/'
-  right_fold = 'image_3/'
+#   left_fold  = 'image_2/'
+#   right_fold = 'image_3/'
 
 # Cityscapes
-#   left_fold  = 'Left/'
-#   right_fold = 'Right/'
+  left_fold  = 'Left/'
+  right_fold = 'Right/'
 
 
-  image = [img for img in os.listdir(filepath+left_fold) if img.find('_10') > -1]
+#   image = [img for img in os.listdir(filepath+left_fold) if img.find('_10') > -1]
+  imageL = [img for img in os.listdir(filepath+left_fold)]
+  imageR = [img for img in os.listdir(filepath+right_fold)]
 
 
-  left_test  = [filepath+left_fold+img for img in image]
-  right_test = [filepath+right_fold+img for img in image]
+  left_test  = [filepath+left_fold+img for img in imageL]
+  right_test = [filepath+right_fold+img for img in imageR]
 
   return left_test, right_test
