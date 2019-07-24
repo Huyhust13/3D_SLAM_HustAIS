@@ -189,6 +189,8 @@ https://medium.com/@kapilvarshney/how-to-setup-ubuntu-16-04-with-cuda-gpu-and-ot
 Work-flow:
 <img align="center" src="https://raw.githubusercontent.com/Huyhust13/3D_SLAM_HustAIS/master/figures/work-fl.png">
 
+ver1.0:
+<img align="center" src="https://raw.githubusercontent.com/Huyhust13/3D_SLAM_HustAIS/master/figures/workflowTestDepth.png">
 --------------
 ## Triển khai:
 
