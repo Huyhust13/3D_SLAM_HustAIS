@@ -99,14 +99,19 @@ def main():
        imgR_o = (skimage.io.imread(test_right_img[inx]).astype('float32'))
        imgL = processed(imgL_o).numpy()
        imgR = processed(imgR_o).numpy()
+       
+       imgL = imgL[:,0:imgL.shape[1]/2, 0:imgL.shape[2]/2]
+    #    trace("{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
+
        imgL = np.reshape(imgL,[1,3,imgL.shape[1],imgL.shape[2]])
        imgR = np.reshape(imgR,[1,3,imgR.shape[1],imgR.shape[2]])
        
        # resize
     #    Voi bo du lieu CityScapes
-       imgL = np.resize(imgL, (1,3,512,1024))
-       imgR = np.resize(imgR, (1,3,512,1024))
-    #    trace("{}:{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2], imgL.shape[3]))
+    #    imgL = np.resize(imgL, (1,3,512,1024))
+    #    imgR = np.resize(imgR, (1,3,512,1024))
+
+       trace("{}:{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2], imgL.shape[3]), False)
 
        # pad to (384, 1248)
        # Doan code nay dung cho bo KITTI voi kich thuoc anh nho hon (384, 1248)
