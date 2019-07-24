@@ -108,22 +108,7 @@ Dữ liệu:
     - disparity precomputed disparity depth maps. To obtain the disparity values, compute for each pixel p with p > 0: d = ( float(p) - 1. ) / 256., while a value p = 0 is an invalid measurement. Warning: the images are stored as 16-bit pngs, which is non-standard and not supported by all libraries.
 
 
-## Các bước dự kiến
-1. Chạy lại file submission.py chạy mạng PSMNet để ra disparity map.
-2. Dùng bộ Stereo_train_001 để tính depth từ disparity.
-4. Kết nối với object detection
-3. Nối thông từ chạy ảnh stereo ra depth.
-
-Work-flow:
-<img align="center" src="https://raw.githubusercontent.com/Huyhust13/3D_SLAM_HustAIS/master/figures/work-fl.png">
-
-## Triển khai:
-
-## Khó khăn hiện tại
-- Khó xác định baseline và focal của hệ thống stereo
-- Chưa ghép được hệ thống
-
-
+------------
 ## Một số opensource
 ### [PSMNet](https://github.com/JiaRenChang/PSMNet)
 - Thử chạy file submission.py với dữ liệu đã train sẵn *.tar
@@ -193,4 +178,27 @@ https://medium.com/@kapilvarshney/how-to-setup-ubuntu-16-04-with-cuda-gpu-and-ot
 3. Cài các gói cần thiết: 
 `pip install -r requirements.txt`
 - Kiểm chứng kết quả đo???
+
+---------
+## Các bước dự kiến (update: 24/07/2019)
+1. Chạy lại file submission.py chạy mạng PSMNet để ra disparity map.
+2. Dùng bộ disparity_trainvaltest từ Cityscape để tính depth từ disparity.
+4. Kết nối với object detection
+3. Nối thông từ chạy ảnh stereo ra depth.
+
+Work-flow:
+<img align="center" src="https://raw.githubusercontent.com/Huyhust13/3D_SLAM_HustAIS/master/figures/work-fl.png">
+
+--------------
+## Triển khai:
+
+Update 24/7/2019:
+- Chạy dữ liệu CityScapes với PSMNet thiếu dung lượng GPU.
+    - Khắc phục: 
+        - Giảm size ảnh đầu vào bằng np.resize --> disparity không đúng
+    - Giải pháp:
+        - Mượn gpu để chạy
+        - Tìm cách để chạy được infer với gpu ram thấp
+        - Chọn mạng khác
+
 
