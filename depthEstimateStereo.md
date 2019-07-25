@@ -174,6 +174,14 @@ Vì sao chỉ 1 ảnh lại có thể ra đc chiều sâu???
 ### Cài cuda và sử dụng trên venv
 1. Cài cuda  
 https://medium.com/@kapilvarshney/how-to-setup-ubuntu-16-04-with-cuda-gpu-and-other-requirements-for-deep-learning-f547db75f227
+
+Kich hoat cuda:
+```
+# env cuda
+export PATH=$PATH:/usr/local/cuda-10.1/bin
+export CUDADIR=/usr/local/cuda-10.1
+```
+
 2. Tạo môi trường venv để chạy laị code submission.py
 3. Cài các gói cần thiết: 
 `pip install -r requirements.txt`
