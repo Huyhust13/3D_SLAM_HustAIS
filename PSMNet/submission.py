@@ -63,7 +63,7 @@ elif args.model == 'basic':
 else:
     print('no model')
 
-model = nn.DataParallel(model, device_ids=[0])
+model = nn.DataParallel(model, device_ids=[0,1,2,3])
 # trace("model cuda")
 model.cuda()
 
@@ -93,14 +93,14 @@ def test(imgL,imgR):
 def main():
    processed = preprocess.get_transform(augment=False)
    for inx in range(len(test_left_img)): #len(test_left_img)
-       trace("in main", False)
+    #   trace("in main", False)
 
        imgL_o = (skimage.io.imread(test_left_img[inx]).astype('float32'))
        imgR_o = (skimage.io.imread(test_right_img[inx]).astype('float32'))
        imgL = processed(imgL_o).numpy()
        imgR = processed(imgR_o).numpy()
        
-       imgL = imgL[:,0:imgL.shape[1]/2, 0:imgL.shape[2]/2]
+    #   imgL = imgL[:,0:imgL.shape[1]/2, 0:imgL.shape[2]/2]
     #    trace("{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
 
        imgL = np.reshape(imgL,[1,3,imgL.shape[1],imgL.shape[2]])
@@ -111,16 +111,16 @@ def main():
     #    imgL = np.resize(imgL, (1,3,512,1024))
     #    imgR = np.resize(imgR, (1,3,512,1024))
 
-       trace("{}:{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2], imgL.shape[3]), False)
+       trace("imgL: {}:{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2], imgL.shape[3]), False)
 
        # pad to (384, 1248)
        # Doan code nay dung cho bo KITTI voi kich thuoc anh nho hon (384, 1248)
        # phai them vao de dat duoc kich thuoc anh phu hop   
-    #    top_pad = 384-imgL.shape[2]
-    #    left_pad = 1248-imgL.shape[3]
+       top_pad = 384-imgL.shape[2]
+       left_pad = 1248-imgL.shape[3]
     # #    trace(str(top_pad))
-    #    imgL = np.lib.pad(imgL,((0,0),(0,0),(top_pad,0),(0,left_pad)),mode='constant',constant_values=0)
-    #    imgR = np.lib.pad(imgR,((0,0),(0,0),(top_pad,0),(0,left_pad)),mode='constant',constant_values=0)
+       imgL = np.lib.pad(imgL,((0,0),(0,0),(top_pad,0),(0,left_pad)),mode='constant',constant_values=0)
+       imgR = np.lib.pad(imgR,((0,0),(0,0),(top_pad,0),(0,left_pad)),mode='constant',constant_values=0)
 
        start_time = time.time()
  
