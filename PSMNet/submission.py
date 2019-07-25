@@ -60,11 +60,16 @@ if args.model == 'stackhourglass':
     model = stackhourglass(args.maxdisp)
 elif args.model == 'basic':
     model = basic(args.maxdisp)
-else:
     print('no model')
 
-model = nn.DataParallel(model, device_ids=[0,1,2,3])
+#model = nn.DataParallel(model, device_ids=[0,1,2,3])
+torch.distributed.init_process_group(backend="nccl", world_size=4, rank=2)
+model = nn.parallel.DistributedDataParallel(model)
 # trace("model cuda")
+# Estimate size 
+#from pytorch_modelsize import SizeEstimator
+#se = SizeEstimator(model, input_size=(1,3,384,348,1,3,384, 348))
+#trace(se.estimate_size())
 model.cuda()
 
 if args.loadmodel is not None:
@@ -88,7 +93,13 @@ def test(imgL,imgR):
         pred_disp = output.data.cpu().numpy()
 
         return pred_disp
-
+def crop_center(img, cropx, cropy):
+	y = img.shape[1]
+	x = img.shape[2]
+	startx = x//2-(cropx//2)
+	starty = y//2-(cropy//2)
+#        trace("{}:{}:{}:{}".format(x,y,startx, starty), False)
+	return img[:,starty:starty+cropy, startx:startx+cropx]
 
 def main():
    processed = preprocess.get_transform(augment=False)
@@ -103,6 +114,20 @@ def main():
     #   imgL = imgL[:,0:imgL.shape[1]/2, 0:imgL.shape[2]/2]
     #    trace("{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
 
+	# crop image Cityscapes:
+#       trace("Before crop: {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]), False)
+#       cropx = 768
+#       cropy = 1024
+#       imgL = crop_center(imgL, cropy, cropx)
+#       imgR = crop_center(imgR, cropy, cropx)
+#       trace("{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]), False)
+
+	# resize image cityscapes
+       trace("Before resize: {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]), False)
+       #imgL = skimage.transform.resize(imgL, (imgL.shape[0], imgL.shape[1]//2, imgL.shape[2]//2), mode='constant')
+#       imgL = skimage.transform.downscale_local_mean(imgL, (1,2,2))
+       trace("After resize {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]), False)
+
        imgL = np.reshape(imgL,[1,3,imgL.shape[1],imgL.shape[2]])
        imgR = np.reshape(imgR,[1,3,imgR.shape[1],imgR.shape[2]])
        
@@ -116,11 +141,11 @@ def main():
        # pad to (384, 1248)
        # Doan code nay dung cho bo KITTI voi kich thuoc anh nho hon (384, 1248)
        # phai them vao de dat duoc kich thuoc anh phu hop   
-       top_pad = 384-imgL.shape[2]
-       left_pad = 1248-imgL.shape[3]
+#       top_pad = 384-imgL.shape[2]
+#       left_pad = 1248-imgL.shape[3]
     # #    trace(str(top_pad))
-       imgL = np.lib.pad(imgL,((0,0),(0,0),(top_pad,0),(0,left_pad)),mode='constant',constant_values=0)
-       imgR = np.lib.pad(imgR,((0,0),(0,0),(top_pad,0),(0,left_pad)),mode='constant',constant_values=0)
+#       imgL = np.lib.pad(imgL,((0,0),(0,0),(top_pad,0),(0,left_pad)),mode='constant',constant_values=0)
+#       imgR = np.lib.pad(imgR,((0,0),(0,0),(top_pad,0),(0,left_pad)),mode='constant',constant_values=0)
 
        start_time = time.time()
  
