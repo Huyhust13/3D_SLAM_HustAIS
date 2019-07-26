@@ -56,6 +56,7 @@ if args.model == 'stackhourglass':
     model = stackhourglass(args.maxdisp)
 elif args.model == 'basic':
     model = basic(args.maxdisp)
+else:
     print('no model')
 
 model = nn.DataParallel(model, device_ids=[0]) #, device_ids=[0,1,2,3]
