@@ -119,25 +119,14 @@ def main():
         imgL = processed(imgL_o).numpy()
         imgR = processed(imgR_o).numpy()
         
-        #   imgL = imgL[:,0:imgL.shape[1]/2, 0:imgL.shape[2]/2]
-        #    trace("{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
-
-
         # crop image Cityscapes:
         # logger.debug("Before crope {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
         # imgL = crop_center(imgL, sizey, sizex)
         # imgR = crop_center(imgR, sizey, sizex)
         # logger.debug("{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
 
-        # resize image cityscapes
-        #    trace("Before resize: {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]), False)
-    #       imgL = skimage.transform.downscale_local_mean(imgL, (1,2,2))
-        # trace("After resize {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]), _exit=False)
-
         imgL = np.reshape(imgL,[1,3,imgL.shape[1],imgL.shape[2]])
         imgR = np.reshape(imgR,[1,3,imgR.shape[1],imgR.shape[2]])
-
-        # trace("imgL: {}:{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2], imgL.shape[3]), False)
 
         # pad to (384, 1248)
         # Doan code nay dung cho bo KITTI voi kich thuoc anh nho hon (384, 1248)
@@ -154,9 +143,12 @@ def main():
         logger.info('time = %.2f' %(time.time() - start_time))
         # print('time = %.2f' %(time.time() - start_time))
 
-        top_pad   = 384-imgL_o.shape[0]
-        left_pad  = 1248-imgL_o.shape[1]
-        img = pred_disp[top_pad:,:-left_pad]
+        # top_pad   = 384-imgL_o.shape[0]
+        # left_pad  = 1248-imgL_o.shape[1]
+        # img = pred_disp[top_pad:,:-left_pad]
+
+        img = pred_disp
+
         skimage.io.imsave("disparity/"+test_left_img[inx].split('/')[-1],(img*256).astype('uint16'))
 
 if __name__ == '__main__':
