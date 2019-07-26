@@ -234,3 +234,11 @@ Update 24/7/2019:
 - resize Cityscape về 768x384:
     - kq? tam chap nhan
     - ram gpu ~2.7gb, time ~1.09s/anh - aisgpu2
+
+- Môi trường: 
+    - cuda 8.0
+    - torch 0.4.0
+    - torchvision 0.2.0
+    ??? Trên home pc khong chay duoc (ubuntu 18.04 cuda 10 -> kq lỗi, cuda 8 -> k chạy đc (đơ luôn máy))
+
+- Tiếp theo: tính depth, tọa độ.
