@@ -56,6 +56,7 @@ if args.model == 'stackhourglass':
     model = stackhourglass(args.maxdisp)
 elif args.model == 'basic':
     model = basic(args.maxdisp)
+else:
     print('no model')
 
 model = nn.DataParallel(model, device_ids=[0]) #, device_ids=[0,1,2,3]
@@ -67,7 +68,7 @@ if args.loadmodel is not None:
     state_dict = torch.load(args.loadmodel)
     model.load_state_dict(state_dict['state_dict'])
 
-logging.info('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
+logger.info('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
 
 def test(imgL,imgR):
         model.eval()
@@ -115,15 +116,16 @@ def main():
         start_time = time.time()
     
         pred_disp = test(imgL,imgR)
-        logger.info('time = %.2f' %(time.time() - start_time))
+        logger.info('time = {}'.format(time.time() - start_time))
 
         top_pad   = 384-imgL_o.shape[0]
         left_pad  = 1248-imgL_o.shape[1]
         img = pred_disp[top_pad:,:-left_pad]
 
         # img = pred_disp
-
-        skimage.io.imsave("disparity/"+test_left_img[inx].split('/')[-1],(img*256).astype('uint16'))
-
+        dispmap = "disparity/"+test_left_img[inx].split('/')[-1]
+        skimage.io.imsave(dispmap,(img*256).astype('uint16'))
+        logger.info('disparity map was saved at {}'.format(dispmap)) 
+        exit()
 if __name__ == '__main__':
    main()
