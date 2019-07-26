@@ -131,8 +131,9 @@ def main():
         # img = pred_disp[top_pad:,:-left_pad]
 
         img = pred_disp
-
-        skimage.io.imsave("disparity/"+test_left_img[inx].split('/')[-1],(img*256).astype('uint16'))
-
+        dispmap = "disparity/"+test_left_img[inx].split('/')[-1]
+        skimage.io.imsave(dispmap,(img*256).astype('uint16'))
+        logger.info('disparity map was saved at {}'.format(dispmap)) 
+        exit()
 if __name__ == '__main__':
     main()
