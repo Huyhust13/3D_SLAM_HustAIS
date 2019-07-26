@@ -212,3 +212,9 @@ Update 24/7/2019:
         - Chọn mạng khác
 
 
+25/07/2019:
+- Chạy mô hình pytorch trên nhiều gpu --> chưa được
+- resize skimage --> mạng k nhận do sai đầu vào
+- dùng opencv --> khác với skimage
+- log --> nếu dùng >> trong bash shell để ghi file thì phải chạy xong vòng for mới hiện ra console (không realtime trong vòng for)
+    - Dùng thư viện logging thì tạo ra nhiều loại log k cần thiết
