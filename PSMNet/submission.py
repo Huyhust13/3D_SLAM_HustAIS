@@ -68,7 +68,7 @@ if args.loadmodel is not None:
     state_dict = torch.load(args.loadmodel)
     model.load_state_dict(state_dict['state_dict'])
 
-logging.info('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
+logger.info('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
 
 def test(imgL,imgR):
         model.eval()
@@ -102,29 +102,37 @@ def main():
         imgL = processed(imgL_o).numpy()
         imgR = processed(imgR_o).numpy()
         
+        sizex = 640 # = 2048/6.4
+        sizey = 320 # = 1024/3.2
+        # crop image Cityscapes:
+        logger.debug("Before crope {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
+        imgL = crop_center(imgL, sizex, sizey)
+        imgR = crop_center(imgR, sizex, sizey)
+        logger.debug("After crope {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
+
+
         imgL = np.reshape(imgL,[1,3,imgL.shape[1],imgL.shape[2]])
         imgR = np.reshape(imgR,[1,3,imgR.shape[1],imgR.shape[2]])
 
         # pad to (384, 1248)
         # Doan code nay dung cho bo KITTI voi kich thuoc anh nho hon (384, 1248)
         # phai them vao de dat duoc kich thuoc anh phu hop   
-        top_pad = 384-imgL.shape[2]
-        left_pad = 1248-imgL.shape[3]
-        imgL = np.lib.pad(imgL,((0,0),(0,0),(top_pad,0),(0,left_pad)),mode='constant',constant_values=0)
-        imgR = np.lib.pad(imgR,((0,0),(0,0),(top_pad,0),(0,left_pad)),mode='constant',constant_values=0)
+        # top_pad = 384-imgL.shape[2]
+        # left_pad = 1248-imgL.shape[3]
+        # imgL = np.lib.pad(imgL,((0,0),(0,0),(top_pad,0),(0,left_pad)),mode='constant',constant_values=0)
+        # imgR = np.lib.pad(imgR,((0,0),(0,0),(top_pad,0),(0,left_pad)),mode='constant',constant_values=0)
 
         start_time = time.time()
-    
         pred_disp = test(imgL,imgR)
-        logger.info('time = %.2f' %(time.time() - start_time))
+        logger.info('time = {}'.format(time.time() - start_time))
 
-        top_pad   = 384-imgL_o.shape[0]
-        left_pad  = 1248-imgL_o.shape[1]
-        img = pred_disp[top_pad:,:-left_pad]
+        # top_pad   = 384-imgL_o.shape[0]
+        # left_pad  = 1248-imgL_o.shape[1]
+        # img = pred_disp[top_pad:,:-left_pad]
 
-        # img = pred_disp
+        img = pred_disp
 
         skimage.io.imsave("disparity/"+test_left_img[inx].split('/')[-1],(img*256).astype('uint16'))
 
 if __name__ == '__main__':
-   main()
+    main()
