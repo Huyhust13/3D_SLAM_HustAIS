@@ -227,3 +227,10 @@ Update 24/7/2019:
 - Chốt dùng log yaml config -> vừa ghi log ra console vừa ghi vào file
 - Sau khi resize thì ra kq không ổn -> Test lại crop thì vẫn không được --> đã fix được nhưng k biết nguyên nhân :(
 
+- resize Cityscape về 1024x512:
+    - kq khá ok
+    - dùng ram gpu ~ 4.5gb, time ~1.9s/ảnh - aisgpu2
+
+- resize Cityscape về 768x384:
+    - kq? tam chap nhan
+    - ram gpu ~2.7gb, time ~1.09s/anh - aisgpu2
