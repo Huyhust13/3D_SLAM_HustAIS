@@ -99,19 +99,21 @@ def main():
         imgL_o = (skimage.io.imread(test_left_img[inx]).astype('float32'))
         imgR_o = (skimage.io.imread(test_right_img[inx]).astype('float32'))
 
+        sizex = 1248 # = 2048/6.4
+        sizey = 384 # = 1024/3.2
+        logger.debug("Before resize {}:{}:{}".format(imgL_o.shape[0], imgL_o.shape[1], imgL_o.shape[2]))
+        imgL_o = skimage.transform.resize(imgL_o, (sizex, sizey))
+        imgR_o = skimage.transform.resize(imgR_o, (sizex, sizey))
+        logger.debug("After resize {}:{}:{}".format(imgL_o.shape[0], imgL_o.shape[1], imgL_o.shape[2]))
+        
         imgL = processed(imgL_o).numpy()
         imgR = processed(imgR_o).numpy()
         
-        sizex = 1248 # = 2048/6.4
-        sizey = 384 # = 1024/3.2
         # crop image Cityscapes:
-        logger.debug("Before crope {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
+        # logger.debug("Before crope {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
         # imgL = crop_center(imgL, sizex, sizey)
         # imgR = crop_center(imgR, sizex, sizey)
-        imgL = skimage.transform.resize(imgL, (sizex, sizey))
-        imgR = skimage.transform.resize(imgR, (sizex, sizey))
-
-        logger.debug("After crope {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
+        # logger.debug("After crope {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
 
 
         imgL = np.reshape(imgL,[1,3,imgL.shape[1],imgL.shape[2]])

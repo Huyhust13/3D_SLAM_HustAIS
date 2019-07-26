@@ -222,3 +222,8 @@ Update 24/7/2019:
 - dùng opencv --> khác với skimage
 - log --> nếu dùng >> trong bash shell để ghi file thì phải chạy xong vòng for mới hiện ra console (không realtime trong vòng for)
     - Dùng thư viện logging thì tạo ra nhiều loại log k cần thiết
+
+26/7/2019:
+- Chốt dùng log yaml config -> vừa ghi log ra console vừa ghi vào file
+- Sau khi resize thì ra kq không ổn -> Test lại crop thì vẫn không được --> đã fix được nhưng k biết nguyên nhân :(
+
