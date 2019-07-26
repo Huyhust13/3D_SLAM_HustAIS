@@ -211,4 +211,8 @@ Update 24/7/2019:
         - Tìm cách để chạy được infer với gpu ram thấp
         - Chọn mạng khác
 
+25/7/2019:
+- Chạy trên gpu (6Gb) của AIS cũng bị `out of memory`.
+    
+
 
