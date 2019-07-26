@@ -18,8 +18,8 @@ import time
 import math
 from utils import preprocess 
 from models import *
-from log import *
-import cv2
+from log_yaml import *
+# import cv2
 
 # 2012 data /media/jiaren/ImageNet/data_scene_flow_2012/testing/
 
@@ -105,42 +105,37 @@ def main():
 
         imgL_o = (skimage.io.imread(test_left_img[inx]).astype('float32'))
         imgR_o = (skimage.io.imread(test_right_img[inx]).astype('float32'))
-        # trace("Before rescale {}:{}:{}".format(imgL_o.shape[0], imgL_o.shape[1], imgL_o.shape[2]))
-        trace("Before rescale {}:{}:{}".format(imgL_o.shape[0], imgL_o.shape[1], imgL_o.shape[2]), _exit = False)
+        
+        sizex = 320 # = 2048/6.4
+        sizey = 320 # = 1024/3.2
 
-        imgL_o = skimage.transform.resize(imgL_o, (imgL_o.shape[0]//2, imgL_o.shape[1]//2, imgL_o.shape[2]))
-        trace("After rescale {}:{}:{}".format(imgL_o.shape[0], imgL_o.shape[1], imgL_o.shape[2]), _exit = False)
+        logger.debug("Before rescale {}:{}:{}".format(imgL_o.shape[0], imgL_o.shape[1], imgL_o.shape[2]))
 
-        # from matplotlib import pyplot as plt
-        # skimage.io.imshow(imgL_o)
-        # plt.show()
+        imgL_o = skimage.transform.resize(imgL_o, (sizex, sizey))
+        imgR_o = skimage.transform.resize(imgR_o, (sizex, sizey))
+
+        logger.debug("After rescale {}:{}:{}".format(imgL_o.shape[0], imgL_o.shape[1], imgL_o.shape[2]))
+        # exit()
         imgL = processed(imgL_o).numpy()
         imgR = processed(imgR_o).numpy()
-        trace(imgL_o, _exit=True)
         
         #   imgL = imgL[:,0:imgL.shape[1]/2, 0:imgL.shape[2]/2]
         #    trace("{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
 
+
         # crop image Cityscapes:
-        # trace("Before crope {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]), _exit = True)
-        # cropx = 480
-        # cropy = 640
-        # imgL = crop_center(imgL, cropy, cropx)
-        # imgR = crop_center(imgR, cropy, cropx)
-        # trace("{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
+        # logger.debug("Before crope {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
+        # imgL = crop_center(imgL, sizey, sizex)
+        # imgR = crop_center(imgR, sizey, sizex)
+        # logger.debug("{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
 
         # resize image cityscapes
         #    trace("Before resize: {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]), False)
     #       imgL = skimage.transform.downscale_local_mean(imgL, (1,2,2))
-        trace("After resize {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]), _exit=False)
+        # trace("After resize {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]), _exit=False)
 
         imgL = np.reshape(imgL,[1,3,imgL.shape[1],imgL.shape[2]])
         imgR = np.reshape(imgR,[1,3,imgR.shape[1],imgR.shape[2]])
-
-        # resize
-        #    Voi bo du lieu CityScapes
-        #    imgL = np.resize(imgL, (1,3,512,1024))
-        #    imgR = np.resize(imgR, (1,3,512,1024))
 
         # trace("imgL: {}:{}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2], imgL.shape[3]), False)
 
@@ -156,7 +151,7 @@ def main():
         start_time = time.time()
     
         pred_disp = test(imgL,imgR)
-        trace('time = %.2f' %(time.time() - start_time),key='info')
+        logger.info('time = %.2f' %(time.time() - start_time))
         # print('time = %.2f' %(time.time() - start_time))
 
         top_pad   = 384-imgL_o.shape[0]
