@@ -98,9 +98,6 @@ def main():
         imgL_o = (skimage.io.imread(test_left_img[inx]).astype('float32'))
         imgR_o = (skimage.io.imread(test_right_img[inx]).astype('float32'))
 
-        imgL_o = skimage.transform.resize(imgL_o, (sizex, sizey))
-        imgR_o = skimage.transform.resize(imgR_o, (sizex, sizey))
-
         imgL = processed(imgL_o).numpy()
         imgR = processed(imgR_o).numpy()
         
