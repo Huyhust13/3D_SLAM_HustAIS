@@ -102,8 +102,8 @@ def main():
         imgL = processed(imgL_o).numpy()
         imgR = processed(imgR_o).numpy()
         
-        sizex = 640 # = 2048/6.4
-        sizey = 320 # = 1024/3.2
+        sizex = 1248 # = 2048/6.4
+        sizey = 384 # = 1024/3.2
         # crop image Cityscapes:
         logger.debug("Before crope {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
         imgL = crop_center(imgL, sizex, sizey)
