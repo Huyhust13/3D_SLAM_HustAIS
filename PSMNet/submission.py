@@ -99,11 +99,11 @@ def main():
         imgL_o = (skimage.io.imread(test_left_img[inx]).astype('float32'))
         imgR_o = (skimage.io.imread(test_right_img[inx]).astype('float32'))
 
-        sizex = 1248 # = 2048/6.4
-        sizey = 384 # = 1024/3.2
+        sizex = 768#1024 # = 2048/6.4
+        sizey = 384#512 # = 1024/3.2
         logger.debug("Before resize {}:{}:{}".format(imgL_o.shape[0], imgL_o.shape[1], imgL_o.shape[2]))
-        imgL_o = skimage.transform.resize(imgL_o, (sizex, sizey))
-        imgR_o = skimage.transform.resize(imgR_o, (sizex, sizey))
+        imgL_o = skimage.transform.resize(imgL_o, (sizey, sizex),anti_aliasing=True)
+        imgR_o = skimage.transform.resize(imgR_o, (sizey, sizex),anti_aliasing=True)
         logger.debug("After resize {}:{}:{}".format(imgL_o.shape[0], imgL_o.shape[1], imgL_o.shape[2]))
         
         imgL = processed(imgL_o).numpy()
@@ -139,6 +139,5 @@ def main():
         dispmap = "disparity/"+test_left_img[inx].split('/')[-1]
         skimage.io.imsave(dispmap,(img*256).astype('uint16'))
         logger.info('disparity map was saved at {}'.format(dispmap)) 
-        exit()
 if __name__ == '__main__':
     main()
