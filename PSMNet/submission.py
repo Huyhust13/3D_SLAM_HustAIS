@@ -106,8 +106,11 @@ def main():
         sizey = 320 # = 1024/3.2
         # crop image Cityscapes:
         logger.debug("Before crope {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
-        imgL = crop_center(imgL, sizex, sizey)
-        imgR = crop_center(imgR, sizex, sizey)
+        # imgL = crop_center(imgL, sizex, sizey)
+        # imgR = crop_center(imgR, sizex, sizey)
+        imgL = skimage.transform.resize(imgL, (sizex, sizey))
+        imgR = skimage.transform.resize(imgR, (sizex, sizey))
+
         logger.debug("After crope {}:{}:{}".format(imgL.shape[0], imgL.shape[1], imgL.shape[2]))
 
 
