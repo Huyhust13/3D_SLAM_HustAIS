@@ -25,19 +25,15 @@ def readDepth(disp_path):
     # dispMap = cv2.imread(disp_path, cv2.IMREAD_UNCHANGED).astype(np.float32)
     dispMap = cv2.imread(disp_path, cv2.IMREAD_ANYDEPTH)#.astype(np.float32)
     # ap dung cong thuc, chuyen tu anh disp sang anh depth
-    depthCal = lambda i: (float(focal*baseline)*256/ ((float(i)*2))) if i else 0
+    depthCal = lambda i: (float(focal*baseline)*256/ ((float(i)*2.))) if i else 0
     convert = np.vectorize(depthCal)
     depthMap = convert(dispMap)
     # depthMap = depthMap.astype(np.uint16)
     depthMap_gray = depthMap.astype(np.uint8)
     # depthMap_gray = depthMap
 
-    # depthMap = map(depthCal, dispMap)
     logger.debug("type of disparity: {} - depth map: {}".format(type(dispMap[1][1]), type(depthMap[1][1])))
     logger.debug("Maximum value of disparity map: {}".format(np.amax(dispMap)))
-    # logger.debug(np.amax(depthMap))
-    # logger.debug(np.amin(depthMap))
-    # exit()
     if depthMap is None:
         logger.error("[ERROR] Cannot load Image!")
         exit()     

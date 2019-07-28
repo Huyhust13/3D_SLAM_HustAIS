@@ -210,9 +210,11 @@ export CUDADIR=/usr/local/cuda-10.1
             - Chế độ đọc trong opencv có
             `CV_LOAD_IMAGE_ANYDEPTH - If set, return 16-bit/32-bit image when the input has the corresponding depth, otherwise convert it to 8-bit.`
             -> Đọc bằng ANYDEPTH sẽ đọc đúng định dạng unit16. Sau đó chia cho 256 là dc gía trị đúng của disparity.
-
+        - **Nhưng:**
+            - Ảnh (1024x512) là đã downscale xuống 1 nửa, do đó disprity (độ chênh lệch pixel) sẽ bằng 1 nửa so với ảnh gốc (2048x1024). Do đó khi tính phải x2 sau đó mới chia cho 256 --> kq tương đồng với disparity mà dataset cho.
 3. Kiểm tra độ chinh xác khi tính depth (ảnh hưởng từ disparity, định dạng dữ liệu, thông số camera):
     - Dùng bộ apollo có ảnh depth (down xuống mỗi cạnh 4 lần)
+        - Kết quả khi chạy ảnh apolo down ảnh xuống còn 832x672 thì kq tệ. Dạo quanh các diễn đàn thì thấy họ dùng bộ apolo để train lại chứ k dùng pre-trained model của KITTY.
     - Khi so sánh giữa đọc depth từ disparity của cityscape cho sẵn với ảnh disparity tính được thì depth từ ảnh sẵn có vẻ bằng 1 nửa so với ảnh tính ra và có vẻ hợp lý hơn.
 4. Kết nối với object detection
 3. Nối thông từ chạy ảnh stereo ra depth.
