@@ -190,7 +190,30 @@ export CUDADIR=/usr/local/cuda-10.1
 ---------
 ## Các bước dự kiến (update: 24/07/2019)
 1. Chạy lại file submission.py chạy mạng PSMNet để ra disparity map.
-2. Dùng bộ disparity_trainvaltest từ Cityscape để tính depth từ disparity.
+    - Đã ok. Kết quả tạo ra trong 21 file trong thư mục disparity/tmp_1024x512 (resize từ 2024x1024 <-> giảm 2 lần mỗi chiều)
+2. Tính depth và tọa độ từ ảnh disparity.
+    - Đã tính được với ảnh disparity Cityscape (file depthEstimate/depthFromDisparity với source PSMNet/disparity/tmp_1024x512) nhưng kq có vẻ chưa đúng lắm. Chuyển sang phần 3 để kiểm tra ảnh depth.
+    - Usage:
+    `./depthFromDisparity.py --image ../PSMNet/disparity/tmp_1024x512/berlin_000002_000019_leftImg8bit.png`
+    - Ảnh depth trông có vẻ khá ổn (khi xét sự tương quan giữa các đối tượng trong ảnh với nhau). Còn giá trị depth thì có vẻ chưa chính xác lắm
+    - Các yếu tố có thể ảnh hưởng tới độ chính xác khi đọc depth:
+        - Thông số camera: baseline, **focal**
+        - Định dạng ảnh disparity khi lưu -> _Đã xác thực, không sai ở phần này.
+        - Các hệ số chuyển đổi...
+
+    - **Xác thực định dạng:**
+        - Ở file submission.py lưu disparity với lệnh:
+            - `skimage.io.imsave(dispmap,(img*256).astype('uint16'))`
+            - Giá trị mỗi pixel dc nhân lên 256 lần
+            - Định dạng uint16
+        - Đọc file 
+            - Chế độ đọc trong opencv có
+            `CV_LOAD_IMAGE_ANYDEPTH - If set, return 16-bit/32-bit image when the input has the corresponding depth, otherwise convert it to 8-bit.`
+            -> Đọc bằng ANYDEPTH sẽ đọc đúng định dạng unit16. Sau đó chia cho 256 là dc gía trị đúng của disparity.
+
+3. Kiểm tra độ chinh xác khi tính depth (ảnh hưởng từ disparity, định dạng dữ liệu, thông số camera):
+    - Dùng bộ apollo có ảnh depth (down xuống mỗi cạnh 4 lần)
+    - Khi so sánh giữa đọc depth từ disparity của cityscape cho sẵn với ảnh disparity tính được thì depth từ ảnh sẵn có vẻ bằng 1 nửa so với ảnh tính ra và có vẻ hợp lý hơn.
 4. Kết nối với object detection
 3. Nối thông từ chạy ảnh stereo ra depth.
 
@@ -201,6 +224,10 @@ ver1.0:
 <img align="center" src="https://raw.githubusercontent.com/Huyhust13/3D_SLAM_HustAIS/master/figures/workflowTestDepth.png">
 --------------
 ## Triển khai:
+
+1. 
+
+2. 
 
 Update 24/7/2019:
 - Chạy dữ liệu CityScapes với PSMNet thiếu dung lượng GPU.
@@ -228,7 +255,7 @@ Update 24/7/2019:
 - Sau khi resize thì ra kq không ổn -> Test lại crop thì vẫn không được --> đã fix được nhưng k biết nguyên nhân :(
 
 - resize Cityscape về 1024x512:
-    - kq khá ok
+    - kq khá ok (file tmp_1024x512)
     - dùng ram gpu ~ 4.5gb, time ~1.9s/ảnh - aisgpu2
 
 - resize Cityscape về 768x384:
@@ -242,3 +269,4 @@ Update 24/7/2019:
     ??? Trên home pc khong chay duoc (ubuntu 18.04 cuda 10 -> kq lỗi, cuda 8 -> k chạy đc (đơ luôn máy))
 
 - Tiếp theo: tính depth, tọa độ.
+

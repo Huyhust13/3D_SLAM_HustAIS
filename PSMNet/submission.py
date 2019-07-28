@@ -99,7 +99,7 @@ def main():
         imgL_o = (skimage.io.imread(test_left_img[inx]).astype('float32'))
         imgR_o = (skimage.io.imread(test_right_img[inx]).astype('float32'))
 
-        sizex = 768#1024 # = 2048/6.4
+        sizex = 640#1024 # = 2048/6.4
         sizey = 384#512 # = 1024/3.2
         logger.debug("Before resize {}:{}:{}".format(imgL_o.shape[0], imgL_o.shape[1], imgL_o.shape[2]))
         imgL_o = skimage.transform.resize(imgL_o, (sizey, sizex),anti_aliasing=True)
