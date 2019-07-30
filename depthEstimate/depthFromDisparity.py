@@ -7,6 +7,7 @@ from log_yaml import *
 
 parser = argparse.ArgumentParser(description="depthFromDisparity")
 parser.add_argument("--image", help="path to disparity image")
+parser.add_argument("--mode", default="show", help="select mode: 'save' - save to image; 'show' - show depth image ")
 args = parser.parse_args()
 
 if not args.image:
@@ -41,7 +42,7 @@ def readDepth(disp_path):
     cv2.namedWindow("disp", cv2.WINDOW_NORMAL)
     cv2.setMouseCallback("depth", click_event, (depthMap, dispMap))
     while True:
-        cv2.imshow("disp", dispMap)
+        # cv2.imshow("disp", dispMap)
         cv2.imshow("depth", depthMap_gray)
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
