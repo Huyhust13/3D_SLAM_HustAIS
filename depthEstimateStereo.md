@@ -271,4 +271,3 @@ Update 24/7/2019:
     ??? Trên home pc khong chay duoc (ubuntu 18.04 cuda 10 -> kq lỗi, cuda 8 -> k chạy đc (đơ luôn máy))
 
 - Tiếp theo: tính depth, tọa độ.
-
