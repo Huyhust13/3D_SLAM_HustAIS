@@ -216,7 +216,16 @@ export CUDADIR=/usr/local/cuda-10.1
     - Dùng bộ apollo có ảnh depth (down xuống mỗi cạnh 4 lần)
         - Kết quả khi chạy ảnh apolo down ảnh xuống còn 832x672 thì kq tệ. Dạo quanh các diễn đàn thì thấy họ dùng bộ apolo để train lại chứ k dùng pre-trained model của KITTY.
     - Khi so sánh giữa đọc depth từ disparity của cityscape cho sẵn với ảnh disparity tính được thì depth từ ảnh sẵn có vẻ bằng 1 nửa so với ảnh tính ra và có vẻ hợp lý hơn.
-4. Kết nối với object detection
+4. Kết nối với object detection:
+ - Lấy depth khi có bouding box:
+    - Ví dụ chương trình 3D object detection sử dụng Intel realsense lấy depth của object bằng cách lấy depth của tâm bounding box.
+    [Link](https://github.com/PINTO0309/MobileNet-SSD-RealSense/blob/master/MultiStickSSDwithRealSense_OpenVINO_NCS2.py)
+    ```python
+    # 0:=RealSense Mode, 1:=USB Camera Mode
+    if camera_mode == 0:
+        meters = depth_dist.get_distance(box_left+int((box_right-box_left)/2), box_top+int((box_bottom-box_top)/2))
+        label_text = LABEL[int(class_id)] + " (" + str(percentage) + "%)"+ " {:.2f}".format(meters) + " meters away"
+    ```
 3. Nối thông từ chạy ảnh stereo ra depth.
 
 Work-flow:
@@ -271,3 +280,40 @@ Update 24/7/2019:
     ??? Trên home pc khong chay duoc (ubuntu 18.04 cuda 10 -> kq lỗi, cuda 8 -> k chạy đc (đơ luôn máy))
 
 - Tiếp theo: tính depth, tọa độ.
+
+01/08/2019:
+- Kiếm được ảnh KITTY vừa có stereo và vừa có depth
+- Chạy PSMNet xong, nhưng chưa tìm được thông số camera để kiểm chứng.
+
+02/08/2019:
+- Tạm dùng `For KITTI the baseline is 0.54m and the focal ~721 pixels` làm thông số Stereo KITTY 
+- Chạy readDepth: `./readDepth.py --image ../data/KITTY/depth/depth/0000000009.png `
+- Chạy depth from disparity: `./depthFromDisparity.py --dataset KITTY --image ../PSMNet/disparity/0000000009.png`
+- Chưa tìm được thông số ảnh depth để so sánh.
+
+03/08/2019:
+
+- Found KITTY parrams: 
+    - Saved as uint16 PNG images.
+    - The depth per pixel can be computed in meter by converting uint16 to float and dividing it by 256.0: 
+    `depth(x,y) = float(I(x,y)/256.0)`
+    [Link here](http://www.cvlibs.net:3000/ageiger/rob_devkit/src/master/depth)
+
+    - Extrinsic: 
+        - baseline = 0.54m.
+        - depth from lidar > depth from Stereo: 0.27m
+        - [link here](http://www.cvlibs.net/datasets/kitti/setup.php)
+- How to compare depth (from dataset and from PSMNet)??? 
+
+Compare:
+(_Depth from dataset should be greater than depth from PSMNet 0.27m_)
+
+| Position | Depth From dataset | Depth from PSMNet |
+|---|---|---|
+| (445:220) | 13.9140625 | 13.6835584843 |
+| (455:220) | 14.1796875 | 13.8355136036 |
+| (393:166) | 8.8046875 | 8.72088896666 |
+| (709:183) | 77.55078125 | 56.7279681275 |
+| (857:173) | 30.82421875 | 28.4937221269 |
+| (613:163) | 29.94921875 | 27.9347085202 |
+|  |  |  |
