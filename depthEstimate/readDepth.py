@@ -1,14 +1,15 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import cv2
+import argparse
 
-# Stereo camera parameters - Cityscape:
-focal = 2262.52 #pixel
-baseline = 0.209313 #met
+parser = argparse.ArgumentParser(description="read depth image")
+parser.add_argument("--image", help="Path to depth image")
+args = parser.parse_args()
 
 def click_event(event, x, y, flags, depth):
     if event == cv2.EVENT_FLAG_LBUTTON:
-        print("Deptp at ({}:{}) is {}".format(x, y, depth[y, x]/200)) #(focal*baseline*200 / depth[y, x])))
-        print(type(depth[x,y]/200))
+        print("Deptp at ({}:{}) is {}".format(x, y, float(depth[y, x]))) #/256.0 
+        # print(type(depth[x,y]/200))
 
 
 def readDepth(depth_path):
@@ -29,6 +30,6 @@ def readDepth(depth_path):
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    depth_path = "/media/huynv/Data/14.ComputerVision/ApolloDataset/Depth/Record021/Camera 5/170927_070404283_Camera_5.png"
+    depth_path = args.image
     # depth_path = "./dataSets/berlin_000000_000019_disparity.png"
     readDepth(depth_path)

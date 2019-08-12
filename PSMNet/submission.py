@@ -58,7 +58,7 @@ elif args.model == 'basic':
     model = basic(args.maxdisp)
 else:
     print('no model')
-
+    
 model = nn.DataParallel(model, device_ids=[0]) #, device_ids=[0,1,2,3]
 # torch.distributed.init_process_group(backend="nccl", world_size=4, rank=2)
 # model = nn.parallel.DistributedDataParallel(model)
