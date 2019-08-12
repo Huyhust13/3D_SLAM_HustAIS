@@ -1,30 +1,55 @@
+import os 
 import cv2 as cv
 import numpy as np
 import json
+import argparse
 
-img = cv.imread("170927_070404283_Camera_5_instanceIds.png")
+parser = argparse.ArgumentParser(description="boundingbox")
+parser.add_argument("--name", help="name of data", default="aachen_000000_000019")
+args = parser.parse_args()
 
-if "170927_070404283_Camera_5.json":
-            with open("170927_070404283_Camera_5.json", 'r') as f:
-                datastore = json.load(f)
+imgColor = args.name + "_leftImg8bit.png"
+labelFile = args.name + "_gtFine_polygons.json"
 
+img = cv.imread(imgColor)
+
+if labelFile:
+    with open(labelFile, 'r') as f:
+        datastore = json.load(f)
+                
+object_labels = ['traffic sign','traffic light','pole']
 font = cv.FONT_HERSHEY_SIMPLEX
-for j in range(len(datastore["objects"])):
+
+print("SL object: " + str(len(datastore["objects"])))
+
+for j in range(len(datastore["objects"])):      #range(10):     #
     X= []
-    Y=[]
-    print(j)
-    for i in range(len(datastore["objects"][j]['polygons'][0])):
-        X.append(datastore["objects"][j]['polygons'][0][i][0])
-        Y.append(datastore["objects"][j]['polygons'][0][i][1])
+    Y= []
+    for i in range(len(datastore["objects"][j]['polygon'])):
+        X.append(datastore["objects"][j]['polygon'][i][0])
+        Y.append(datastore["objects"][j]['polygon'][i][1])
         
     X = np.array(X)
     Y = np.array(Y)
+    
     xmax = X[np.argmax(X)]
     ymax = Y[np.argmax(Y)]
     xmin = X[np.argmin(X)]
     ymin = Y[np.argmin(Y)]
-    cv.putText(img, str(datastore["objects"][j]['label']), (xmin+5,ymin-5), font, 1, (255,255,0), 1) 
-    cv.rectangle(img, (xmin, ymin), (xmax, ymax), color=(0, 255, 0))
-cv.imwrite("test.jpg",img)
+    label = str(datastore["objects"][j]['label'])
+    try:
+        index = object_labels.index(label)
+        print("Number of vertices of Object {} is : {}".format(j, len(X)))
+    except:
+        continue
+    
+    if len(X) < 6:
+        print("Number of vertices: " + str(len(X)))
+        print(label)
+        print(xmin, ymin, xmax -xmin, ymax -ymin)
+        cv.putText(img, str(datastore["objects"][j]['label']), (xmin+5,ymin-5), font, 1, (255,255,0), 1) 
+        cv.rectangle(img, (xmin, ymin), (xmax, ymax), color=(0, 255, 0))
 
+img_out = args.name + "_labeled.png"
+cv.imwrite(img_out,img) #bochum_000000_003245
 
