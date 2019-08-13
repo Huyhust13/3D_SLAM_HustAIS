@@ -31,7 +31,7 @@ def getObjects(filePath):
     with open(filePath, 'r') as f:
         boundingboxs = json.load(f)
 
-    landmark_labels = ['traffic sign','traffic light','pole']
+    landmark_labels = ['traffic light','pole']  #'traffic sign',
     preLandmarks = []
     for i in range(len(boundingboxs["objects"])):
         # Toa do dinh hinh da giac cua objects:
@@ -51,17 +51,6 @@ def getObjects(filePath):
             preLandmarks.append([xmin, ymin, xmax, ymax])
     return preLandmarks
 
-# Thong so Stereo camera CityScapes
-focal = 2262.52 #pixel
-baseline = 0.209313 #met
-# He so:
-# scale_factor: su dung khi scale anh nho xuong de chay PSMNet
-# depth_factor: su dung khi nhanh he so vao anh depth de hien thi
-scale_factor = 2.0 
-depth_factor = 1.0
-# depth_threshold: neu depth tinh duoc lon hon depth_threshold thi bo qua vi thieu chinh xac 
-depth_threshold = 30
-
 # Ham lay depth trung binh cua nhieu diem xung quanh (x,y)
 def averageValue(x, y, depth, numPx = 5):
     tmpSum = 0
@@ -78,7 +67,7 @@ def averageValue(x, y, depth, numPx = 5):
         return 0
 
 # Ham tinh Position:
-def getPos(x, y, dispMap):
+def getPos(x, y, dispMap, baseline, focal, scale_factor=2.0):
     disp = averageValue(x, y, dispMap)
     disp_i = float(disp)*scale_factor/256.0
     width = dispMap.shape[1]
@@ -90,19 +79,58 @@ def getPos(x, y, dispMap):
 
 # Ham getLandmark Position
 # IN: disparity map, preLandmark
-# OUT: landmarks
-def getLandmarks(dispMap, preLandmarks):
+# OUT: landmarks = [[subindex, X, Z]...]
+def getLandmarks(dispMap, preLandmarks, baseline, focal, depth_threshold=30, scale_factor = 2.0):
     subIndex = 1
     landmarks = []
     for landmark in preLandmarks:
         _x = int((landmark[0] + landmark[2])/(2*scale_factor)) 
-        _y = int((landmark[1] + landmark[3])/(2*scale_factor)) 
-        X, Z = getPos(_x, _y, dispMap)
+        _y = int((landmark[1] + landmark[3])/(2*scale_factor))
+        n = 200
+        restricted_width = dispMap.shape[1]*scale_factor/n 
+        if _x < restricted_width or _x > restricted_width*(n-1):
+            continue
+        X, Z = getPos(_x, _y, dispMap, baseline, focal)
         if Z < depth_threshold:
-            landmarks.append([subIndex, X, Z])
+            landmarks.append([subIndex, X, Z, landmark])
             subIndex += 1
         
     return landmarks
             
-
+    # Ham lay thong tin camera 
+def getCameraParams(fileJson):
+    # load json file
+    with open(fileJson, 'r') as f:
+        params = json.load(f)
     
+    baseline = params["extrinsic"]["baseline"]
+    focal = params["intrinsic"]["fx"]
+    x_ex = params["extrinsic"]["x"]
+    y_ex = params["extrinsic"]["y"]
+
+    return baseline, focal, x_ex, y_ex
+
+# Ham chuyen vi tri cua landmark doi voi odometry cua xe
+def getLandmarksPos(landmarks, x_ex, y_ex):
+    landmarksPos = []
+    for landmark in landmarks:
+        x_pv = landmark[2] + x_ex
+        y_pv = landmark[1] + y_ex
+        landmarksPos.append([landmark[0], x_pv, y_pv, landmark[3]])
+    return landmarksPos
+
+
+# Ham ve len anh cac thong tin can thiet de kiem tra
+def drawLandmarks(imgIn, landmarks):
+    # Ve landmark len leftImage
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    # Su dung ham .copy() de copy sang mot image moi de khong ve len anh goc
+    imgOut = imgIn.copy()
+    for landmark in landmarks:
+        xmin = landmark[3][0]
+        ymin = landmark[3][1]
+        xmax = landmark[3][2]
+        ymax = landmark[3][3]
+        cv2.rectangle(imgOut, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+        cv2.putText(imgOut, "{} - [{:.2f} ; {:.2f}]".format(landmark[0], landmark[1], landmark[2]), (xmin+5,int((ymin+ymax)/2)), font, 1, (255,255,0), 2) 
+    return imgOut
