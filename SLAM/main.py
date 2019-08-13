@@ -28,7 +28,7 @@ logger.info(dispFolder)
 #   2.1. Tinh depth: trung binh nhieu diem
 #   2.1. Tinh X: Diem trung tam
 if __name__ == "__main__":
-    indexImgs = indexLoader(leftImg, ['.png'])
+    indexImgs = indexLoader(leftImgFolder, ['.png'])
     logger.debug("indexImgs: " + str(indexImgs))
 
     preLandmarks = getObjects(gtFine + args.city.split("_")[0] + indexImgs[0] + "gtFine_polygons.json" )
