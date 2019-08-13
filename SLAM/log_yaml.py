@@ -9,6 +9,7 @@ with open('logconfig.yaml', 'r') as f:
 logging.config.dictConfig(log_cfg)
 logger = logging.getLogger('dev')
 logger.setLevel(logging.DEBUG)
+logger.debug("\n\n=====================START==================")
 
 # logger.debug('This is a debug message')
 # logger.info('This is an info message')
