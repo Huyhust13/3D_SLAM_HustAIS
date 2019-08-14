@@ -5,6 +5,7 @@ import argparse
 import sys
 from ultils import *
 from log_yaml import *
+from g2o_ultils import * 
 
 parser = argparse.ArgumentParser(description="graphBaseSLAM")
 parser.add_argument("--dataset", help="path to dataset", default="/media/huynv/My Passport/1.3DVision/2.Data/3DSlamData/")
@@ -19,6 +20,8 @@ gtFine = args.dataset + args.city + "/gtFine/"
 dispFolder = args.dataset + args.city + "/disparityPSMNet/" 
 # Path to camera folder
 camParamFolder = args.dataset + args.city + "/camera/" 
+# Path to vehicle folder
+vehicleFoler = args.dataset + args.city + "/vehicle/" 
 
 # Check input
 logger.debug(leftImgFolder)
@@ -63,10 +66,11 @@ if __name__ == "__main__":
         disp_path = dispFolder + args.city.split("_")[0] + indexImgs[i] + "leftImg8bit.png"
         # Load camera params 
         camParamsPath = camParamFolder + args.city.split("_")[0] + indexImgs[i] + "camera.json"
+        # vehicle file path
+        vehiclePath = vehicleFoler + args.city.split("_")[0] + indexImgs[i] + "vehicle.json"
 
         # Thong so Stereo camera CityScapes
         baseline, focal, x_ex, y_ex = getCameraParams(camParamsPath)
-
         
         try:
             leftImg = cv2.imread(leftImgPath, cv2.IMREAD_COLOR)
@@ -86,11 +90,27 @@ if __name__ == "__main__":
 
         # Convert to Vehicel coordinate
         landmarksPos = getLandmarksPos(landmarkFiltered, x_ex, y_ex)
+        logger.debug("\nlandmarksPos" + str(landmarksPos))
+
+        # ghi vao g20
+        x_pv, y_pv = landmarksPos[0:2]
+
+        # Toa do gps tuyet doi cua vi tri dau tien
+        poseInit = []
+        if i==0:
+            rbPoseInit = getRobotPoseGPS(vehiclePath)
+            rbPose = [0,0,0]
+        else:
+            rbPose = odomFromGPS(getRobotPoseGPS(vehiclePath), poseInit)
+        # ------ CODING HERE------
+
 
         # Ve landmark len leftImage
         imgLandmarkCam = drawLandmarks(leftImg, landmarks, textType='area')
         imgLandmarkVehicle = drawLandmarks(leftImg, landmarksPos)
         imgObjects = drawObjects(leftImg, objects)
+        
+        # Show hinh anh. ()
         showImgs = 0
         if showImgs:
             cv2.namedWindow("Landmark Camera", flags=cv2.WINDOW_NORMAL)
@@ -102,9 +122,11 @@ if __name__ == "__main__":
                 if key == ord("q"):
                     break
 
+        # Luu anh
         imgOutName_Obj = ".log/landmarked/" + args.city + indexImgs[i] + "objects.png"
         imgOutName_Cam = ".log/landmarked/" + args.city + indexImgs[i] + "landmarked_Cam.png"
         imgOutName_Vehicle = ".log/landmarked/" + args.city + indexImgs[i] + "landmarked_Vehicle.png"
         cv2.imwrite(imgOutName_Obj, imgObjects)
         cv2.imwrite(imgOutName_Cam, imgLandmarkCam)
         cv2.imwrite(imgOutName_Vehicle, imgLandmarkVehicle)
+

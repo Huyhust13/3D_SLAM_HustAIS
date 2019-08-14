@@ -25,3 +25,16 @@ Aug 13, 2019:
 - landmarks in Vehicle coordinate format: [[x_pv, y_pv, _object]...]
     - x_pv: Chiều sâu tính từ Vehicle coordinate
     - y_pv: Tọa độ theo chiều ngang ảnh (trong vehicle coordinate)
+
+### Áp dụng bộ lọc:
+- Đối tượng thuộc label: "traffic light", "pole"
+- Số đỉnh của đối tượng từ file gtFine.json < 6
+- depth < 30 
+- Object nằm trong vùng từ: x = imgWidth/20 tới imgWidth*19/20 (giữa hai đường màu xanh)
+- Diện tích của bounding box > 500 (px^2 - Tính theo pixel)
+
+### Nội dung ảnh - tên:
+- *_objects.png: Vẽ bouding box toàn bộ object
+- *_landmarked_Cam.png: Chứa thông tin về diện tích và chiều sâu của toàn bộ objects
+- *_landmarked_Vehicle: Chứa thông tin về tọa độ [X_pv, Y_pv] của các objects sau khi áp dụng bộ lọc.
+

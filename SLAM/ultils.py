@@ -5,7 +5,9 @@ import json
 import argparse
 from log_yaml import *
 import cv2
+import math
 
+#region load, file
 # Loc file theo duoi
 def is_type_file(filename, EXTENSIONS):
     return any(filename.endswith(extension) for extension in EXTENSIONS)
@@ -32,7 +34,9 @@ def indexLoader(filepath, EXTENSIONS):
     files = [("_" + file.split('_')[1] + "_" + file.split("_")[2] + "_") for file in os.listdir(filepath) if is_type_file(file, EXTENSIONS)]
     files.sort()
     return files
+#endregion 
 
+#region objects, landmarks
 # === Ham lay toa do pixel cua objects===
 # Input:
 #       - file *_gtFine_polygons.json
@@ -43,7 +47,6 @@ def getObjects(filePath, landmark_labels, verticeMax):
     # load json file
     with open(filePath, 'r') as f:
         boundingboxs = json.load(f)
-
     
     objects = []
     for i in range(len(boundingboxs["objects"])):
@@ -143,8 +146,9 @@ def getLandmarksPos(landmarks, x_ex, y_ex):
         y_pv = landmark[0] + y_ex
         landmarksPos.append([x_pv, y_pv, landmark[2]])
     return landmarksPos
+#endregion
 
-
+#region draw
 # --------- DRAW FUNCTION ------------------------
 # Ham ve len anh cac thong tin can thiet de kiem tra
 def drawLandmarks(imgIn, landmarks,textType = 'landmark'):
@@ -179,3 +183,4 @@ def drawObjects(imgIn, objects):
         ymax = _object[3]
         cv2.rectangle(imgOut, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
     return imgOut
+#endregion
