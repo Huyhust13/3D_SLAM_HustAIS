@@ -29,18 +29,43 @@ def getRobotPoseGPS(filePath):
     longitude_m = distanceGPS(gpsLatitude, 0, gpsLatitude, gpsLongitude)
     # Huong theo don vi radian
     head_degree = gpsHeading*math.pi/180.0 
-    return [head_degree, latitude_m, longitude_m]
+    return [latitude_m, longitude_m, head_degree]
 
 # Ham vi tri tuong doi cua robot theo vi tri ban dau
 # Gia du lieu odom tu gps
 def odomFromGPS(poseGPS, poseInit):
-    odom = []
+    odom = [0,0,0]
     for i in range(len(poseGPS)):
-        odom[i] = poseGPS[i] - poseInit
+        odom[i] = poseGPS[i] - poseInit[i]
     return odom
 
+def disc2pose(pose, pose_old):
+    disc = [0,0,0]
+    for i in range(len(pose)):
+        disc[i] = pose[i] - pose_old[i]
+    return disc
+# Ham ghi them dong vetex vao file vertex  
 
+def writeVertex(vertexFilePath, tag, id_, current_estimate):
+    vertexLine = "{} {} {}\n".format(tag, id_, (' '.join(map(str, current_estimate))))
+    with open(vertexFilePath, 'a') as vertexWriter:
+        vertexWriter.write(vertexLine)
 
+def writeEdge(edgeFilePath, tag, id1, id2, measurement, info_matrix):
+    edgeLine = "{} {} {} {} {}\n".format(tag, id1, id2, (' '.join(map(str, measurement))), (' '.join(map(str, info_matrix))))
+    with open(edgeFilePath, 'a') as edgeWriter:
+        edgeWriter.write(edgeLine)
+        
+def jointFile(g2oFilePath, vertexFilePath, edgeFilePath):
+    with open(vertexFilePath) as vertexFile:
+        with open(g2oFilePath, "a") as g2oFile:
+            for line in vertexFile:
+                g2oFile.write(line)
+
+    with open(edgeFilePath) as edgeFile:
+        with open(g2oFilePath, "a") as g2oFile:
+            for line in edgeFile:
+                g2oFile.write(line)
 # Test
 # filePath = "/media/huynv/Data/14.ComputerVision/3.Data/3DSlamData/aachen_dev/vehicle/aachen_000000_000019_vehicle.json"        
 # getRobotPoseGPS(filePath)

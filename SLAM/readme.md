@@ -40,3 +40,13 @@ Aug 13, 2019:
 - *_landmarked_Cam.png: Chứa thông tin về diện tích và chiều sâu của toàn bộ objects
 - *_landmarked_Vehicle: Chứa thông tin về tọa độ [X_pv, Y_pv] của các objects sau khi áp dụng bộ lọc.
 
+g2o file format:  https://github.com/RainerKuemmerle/g2o/wiki/File-Format-SLAM-2D 
+
+
+## 14/08/2019:
+### Cây thư mục kết quả:
+- Ảnh dãn landmark: ./log/landmarked/
+- file g2o: g2o/{args.city}.g2o
+### features:
+- Chưa có phát hiện landmark trùng
+- Cơ chế tạo file g2o chưa thể dùng nếu có landmark trùng.
