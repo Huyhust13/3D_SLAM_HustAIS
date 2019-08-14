@@ -21,9 +21,9 @@ dispFolder = args.dataset + args.city + "/disparityPSMNet/"
 camParamFolder = args.dataset + args.city + "/camera/" 
 
 # Check input
-logger.info(leftImgFolder)
-logger.info(gtFine)
-logger.info(dispFolder)
+logger.debug(leftImgFolder)
+logger.debug(gtFine)
+logger.debug(dispFolder)
 
 # ====== MAIN ===============================
 # 1. Doc file gtFine .json de lay toa do diem
@@ -33,26 +33,6 @@ logger.info(dispFolder)
 if __name__ == "__main__":
     indexImgs = indexLoader(leftImgFolder, ['.png'])
     logger.debug("indexImgs: " + str(indexImgs))
-
-    preLandmarks = getObjects(gtFine + args.city.split("_")[0] + indexImgs[0] + "gtFine_polygons.json" )
-    logger.debug("preLandmarks: " + str(preLandmarks))
-
-    # load left image:
-    leftImgPath = leftImgFolder + args.city.split("_")[0] + indexImgs[0] + "leftImg8bit.png" 
-    # load disparity 
-    disp_path = dispFolder + args.city.split("_")[0] + indexImgs[0] + "leftImg8bit.png"
-    # Load camera params 
-    camParamsPath = camParamFolder + args.city.split("_")[0] + indexImgs[0] + "camera.json"
-    
-    try:
-        leftImg = cv2.imread(leftImgPath, cv2.IMREAD_COLOR)
-        dispMap = cv2.imread(disp_path, cv2.IMREAD_ANYDEPTH)
-    except:
-        logger.error("Unexpected error:" + str(sys.exc_info()[0]))
-        raise
-
-    # Thong so Stereo camera CityScapes
-    baseline, focal, x_ex, y_ex = getCameraParams(camParamsPath)
     # He so:
     # scale_factor: su dung khi scale anh nho xuong de chay PSMNet
     # depth_factor: su dung khi nhanh he so vao anh depth de hien thi
@@ -60,25 +40,71 @@ if __name__ == "__main__":
     depth_factor = 1.0
     # depth_threshold: neu depth tinh duoc lon hon depth_threshold thi bo qua vi thieu chinh xac 
     depth_threshold = 30
-
-    # get landmarks
-    landmarks = getLandmarks(dispMap, preLandmarks, baseline, focal, depth_threshold, scale_factor)
-    logger.debug("landmarks" + str(landmarks))
     
-    landmarksPos = getLandmarksPos(landmarks, x_ex, y_ex)
+    # Filter Params:
+    _landmark_labels = ['traffic light','pole']  #'traffic sign',
+    _verticeMax = 6
+    _restrictedWidthFactor = 20
+    _depth_th = 30
+    _area_th = 500
+    strParams = "Filter Params:\n\
+        \t_landmark_labels: {}\n\
+        \t_verticeMax: {}\n\
+        \t_restrictedWidthFactor: {}\n\
+        \t_depth_th: {}\n\
+        \t_area_th: {}\n".format(_landmark_labels,_verticeMax,_restrictedWidthFactor, _depth_th, _area_th)
+    logger.info(strParams)
 
-    # Ve landmark len leftImage
-    imgLandmarkCam = drawLandmarks(leftImg, landmarks)
-    imgLandmarkVehicle = drawLandmarks(leftImg, landmarksPos)
-    cv2.namedWindow("Landmark Camera", flags=cv2.WINDOW_NORMAL)
-    cv2.namedWindow("Landmark Vehicle", flags=cv2.WINDOW_NORMAL)
-    while True:
-        cv2.imshow("Landmark Camera", imgLandmarkCam)
-        cv2.imshow("Landmark Vehicle", imgLandmarkVehicle)
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord("q"):
-            break
-    imgOutName_Cam = ".log/landmarked/" + args.city.split("_")[0] + indexImgs[0] + "landmarked_Cam.png"
-    imgOutName_Vehicle = ".log/landmarked/" + args.city.split("_")[0] + indexImgs[0] + "landmarked_Cam.png"
-    cv2.imwrite(imgOutName_Cam, imgLandmarkCam)
-    cv2.imwrite(imgOutName_Vehicle, imgLandmarkVehicle)
+    for i in range(len(indexImgs)):
+        logger.info(args.city + indexImgs[i])
+        # load left image:
+        leftImgPath = leftImgFolder + args.city.split("_")[0] + indexImgs[i] + "leftImg8bit.png" 
+        # load disparity 
+        disp_path = dispFolder + args.city.split("_")[0] + indexImgs[i] + "leftImg8bit.png"
+        # Load camera params 
+        camParamsPath = camParamFolder + args.city.split("_")[0] + indexImgs[i] + "camera.json"
+
+        # Thong so Stereo camera CityScapes
+        baseline, focal, x_ex, y_ex = getCameraParams(camParamsPath)
+
+        
+        try:
+            leftImg = cv2.imread(leftImgPath, cv2.IMREAD_COLOR)
+            dispMap = cv2.imread(disp_path, cv2.IMREAD_ANYDEPTH)
+        except:
+            logger.error("Unexpected error:" + str(sys.exc_info()[0]))
+            raise
+
+        objects = getObjects(gtFine + args.city.split("_")[0] + indexImgs[i] + "gtFine_polygons.json", _landmark_labels, _verticeMax )
+        logger.debug("\nobjects: " + str(objects))
+
+        # get landmarks possition to Camera
+        landmarks = getLandmarks(dispMap, leftImg, objects, baseline, focal, depth_threshold, scale_factor)
+        logger.debug("\nlandmarks" + str(landmarks))
+        # Apply Filter
+        landmarkFiltered = landmark_filter(landmarks,leftImg, _restrictedWidthFactor, _depth_th, _area_th)
+
+        # Convert to Vehicel coordinate
+        landmarksPos = getLandmarksPos(landmarkFiltered, x_ex, y_ex)
+
+        # Ve landmark len leftImage
+        imgLandmarkCam = drawLandmarks(leftImg, landmarks, textType='area')
+        imgLandmarkVehicle = drawLandmarks(leftImg, landmarksPos)
+        imgObjects = drawObjects(leftImg, objects)
+        showImgs = 0
+        if showImgs:
+            cv2.namedWindow("Landmark Camera", flags=cv2.WINDOW_NORMAL)
+            cv2.namedWindow("Landmark Vehicle", flags=cv2.WINDOW_NORMAL)
+            while True:
+                cv2.imshow("Landmark Camera", imgLandmarkCam)
+                cv2.imshow("Landmark Vehicle", imgLandmarkVehicle)
+                key = cv2.waitKey(1) & 0xFF
+                if key == ord("q"):
+                    break
+
+        imgOutName_Obj = ".log/landmarked/" + args.city + indexImgs[i] + "objects.png"
+        imgOutName_Cam = ".log/landmarked/" + args.city + indexImgs[i] + "landmarked_Cam.png"
+        imgOutName_Vehicle = ".log/landmarked/" + args.city + indexImgs[i] + "landmarked_Vehicle.png"
+        cv2.imwrite(imgOutName_Obj, imgObjects)
+        cv2.imwrite(imgOutName_Cam, imgLandmarkCam)
+        cv2.imwrite(imgOutName_Vehicle, imgLandmarkVehicle)

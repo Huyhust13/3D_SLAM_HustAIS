@@ -15,6 +15,19 @@ def fileLoader(filepath, EXTENSIONS):
     files.sort()
     return files
 
+# Ham lay thong tin camera 
+def getCameraParams(fileJson):
+    # load json file
+    with open(fileJson, 'r') as f:
+        params = json.load(f)
+    
+    baseline = params["extrinsic"]["baseline"]
+    focal = params["intrinsic"]["fx"]
+    x_ex = params["extrinsic"]["x"]
+    y_ex = params["extrinsic"]["y"]
+
+    return baseline, focal, x_ex, y_ex
+
 def indexLoader(filepath, EXTENSIONS):
     files = [("_" + file.split('_')[1] + "_" + file.split("_")[2] + "_") for file in os.listdir(filepath) if is_type_file(file, EXTENSIONS)]
     files.sort()
@@ -26,13 +39,13 @@ def indexLoader(filepath, EXTENSIONS):
 # Output:
 #       - List toa do (x,y) cua nhieu diem tren moi object
 #       - preLandmaks: [[xmin, ymin, xmax, ymax]...]
-def getObjects(filePath):
+def getObjects(filePath, landmark_labels, verticeMax):
     # load json file
     with open(filePath, 'r') as f:
         boundingboxs = json.load(f)
 
-    landmark_labels = ['traffic light','pole']  #'traffic sign',
-    preLandmarks = []
+    
+    objects = []
     for i in range(len(boundingboxs["objects"])):
         # Toa do dinh hinh da giac cua objects:
         X = []
@@ -47,9 +60,9 @@ def getObjects(filePath):
         ymin = min(Y)
         label = str(boundingboxs["objects"][i]['label'])
         
-        if ((label in landmark_labels) & (len(X)<6)):
-            preLandmarks.append([xmin, ymin, xmax, ymax])
-    return preLandmarks
+        if ((label in landmark_labels) & (len(X)<verticeMax)):
+            objects.append([xmin, ymin, xmax, ymax])
+    return objects
 
 # Ham lay depth trung binh cua nhieu diem xung quanh (x,y)
 def averageValue(x, y, depth, numPx = 5):
@@ -79,58 +92,90 @@ def getPos(x, y, dispMap, baseline, focal, scale_factor=2.0):
 
 # Ham getLandmark Position
 # IN: disparity map, preLandmark
-# OUT: landmarks = [[subindex, X, Z]...]
-def getLandmarks(dispMap, preLandmarks, baseline, focal, depth_threshold=30, scale_factor = 2.0):
-    subIndex = 1
+# OUT: landmarks = [[X, Z, [xmin, ymin, xmax,]]...]
+def getLandmarks(dispMap, leftImg, objects, baseline, focal, depth_threshold=30, scale_factor = 2.0):
     landmarks = []
-    for landmark in preLandmarks:
-        _x = int((landmark[0] + landmark[2])/(2*scale_factor)) 
-        _y = int((landmark[1] + landmark[3])/(2*scale_factor))
-        n = 200
-        restricted_width = dispMap.shape[1]*scale_factor/n 
-        if _x < restricted_width or _x > restricted_width*(n-1):
-            continue
+    for _object in objects:
+        _x = int((_object[0] + _object[2])/(2*scale_factor)) 
+        _y = int((_object[1] + _object[3])/(2*scale_factor))
         X, Z = getPos(_x, _y, dispMap, baseline, focal)
-        if Z < depth_threshold:
-            landmarks.append([subIndex, X, Z, landmark])
-            subIndex += 1
-        
+        landmarks.append([X, Z, _object])
     return landmarks
             
-    # Ham lay thong tin camera 
-def getCameraParams(fileJson):
-    # load json file
-    with open(fileJson, 'r') as f:
-        params = json.load(f)
-    
-    baseline = params["extrinsic"]["baseline"]
-    focal = params["intrinsic"]["fx"]
-    x_ex = params["extrinsic"]["x"]
-    y_ex = params["extrinsic"]["y"]
+# Ham loc lay landmark tin cay
+# IN: 
+#   - landmarks 
+#   - img: anh leftImg 
+#   - restricedWidthFactor = n, he so gioi han. Vung gioi han tu imgWidth/n -> imgWidth *(n-1)/n
+#   - depth_threshold: Gioi han neu depth tinh ra duoc lon hon depth_threshold thi bi loai bo
+def landmark_filter(landmarks, img, restrictedWidthFactor = 20, depth_th = 25, area_th=100):
+    landmarkFiltered = []
+    n = restrictedWidthFactor
+    for landmark in landmarks:
+        # Gioi han chieu sau
+        depth = landmark[1]
+        if depth > depth_th:
+            continue
+        # Gioi han hai ben theo phuong x
+        imgWidth = img.shape[1]
+        xmax = landmark[2][2]
+        xmin = landmark[2][0]
+        if xmax < imgWidth/n or xmin > imgWidth*(n-1)/n:
+            continue
+        # Gioi han theo dien tich object
+        _area = area(landmark[2])
+        if _area < area_th:
+            continue
+        landmarkFiltered.append(landmark)
+    cv2.line(img, (int(imgWidth/n), 0), (int(imgWidth/n), img.shape[0]), (255, 0, 0), 2)
+    cv2.line(img, (int(imgWidth*(n-1)/n), 0), (int(imgWidth*(n-1)/n), img.shape[0]), (255, 0, 0), 2)
+    return landmarkFiltered
 
-    return baseline, focal, x_ex, y_ex
+def area(_object):
+    xmin, ymin, xmax, ymax = _object
+    return (xmax - xmin)*(ymax - ymin)
 
 # Ham chuyen vi tri cua landmark doi voi odometry cua xe
 def getLandmarksPos(landmarks, x_ex, y_ex):
     landmarksPos = []
     for landmark in landmarks:
-        x_pv = landmark[2] + x_ex
-        y_pv = landmark[1] + y_ex
-        landmarksPos.append([landmark[0], x_pv, y_pv, landmark[3]])
+        x_pv = landmark[1] + x_ex
+        y_pv = landmark[0] + y_ex
+        landmarksPos.append([x_pv, y_pv, landmark[2]])
     return landmarksPos
 
 
+# --------- DRAW FUNCTION ------------------------
 # Ham ve len anh cac thong tin can thiet de kiem tra
-def drawLandmarks(imgIn, landmarks):
+def drawLandmarks(imgIn, landmarks,textType = 'landmark'):
     # Ve landmark len leftImage
     font = cv2.FONT_HERSHEY_SIMPLEX
     # Su dung ham .copy() de copy sang mot image moi de khong ve len anh goc
     imgOut = imgIn.copy()
+    index = 0
     for landmark in landmarks:
-        xmin = landmark[3][0]
-        ymin = landmark[3][1]
-        xmax = landmark[3][2]
-        ymax = landmark[3][3]
+        xmin = landmark[2][0]
+        ymin = landmark[2][1]
+        xmax = landmark[2][2]
+        ymax = landmark[2][3]
         cv2.rectangle(imgOut, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
-        cv2.putText(imgOut, "{} - [{:.2f} ; {:.2f}]".format(landmark[0], landmark[1], landmark[2]), (xmin+5,int((ymin+ymax)/2)), font, 1, (255,255,0), 2) 
+        if(textType=='landmark'):
+            cv2.putText(imgOut, "{} - [{:.2f} ; {:.2f}]".format(index, landmark[0], landmark[1]), (xmin+5,int((ymin+ymax)/2)), font, 1, (255,255,0), 2)
+        elif(textType=='area'):
+            cv2.putText(imgOut, "{}-areaPx:{:.2f}".format(index, area(landmark[2]), landmark[1]), (xmin+5,int((ymin+ymax)/2)), font, 1, (255,255,0), 2)
+            cv2.putText(imgOut, "   D:{:.2f}".format(landmark[1]), (xmin+5,int((ymin+ymax)/2+30)), font, 1, (255,255,0), 2)
+        index += 1
+    return imgOut
+
+# draw objects 
+def drawObjects(imgIn, objects):
+    # Ve objects len leftImage
+    # Su dung ham .copy() de copy sang mot image moi de khong ve len anh goc
+    imgOut = imgIn.copy()
+    for _object in objects:
+        xmin = _object[0]
+        ymin = _object[1]
+        xmax = _object[2]
+        ymax = _object[3]
+        cv2.rectangle(imgOut, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
     return imgOut
