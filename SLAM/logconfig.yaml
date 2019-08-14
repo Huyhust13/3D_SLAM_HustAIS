@@ -2,8 +2,9 @@ version: 1
 
 formatters:
   simple:
-    format: "%(asctime)s %(name)s %(levelname)s: %(message)s"
+    format: "%(name)s %(levelname)s: %(message)s"
   extended:
+    datefmt: "%Y%m%d-%H:%M:%S"
     format: "%(asctime)s %(name)s %(levelname)s: %(message)s"
 
 handlers:
