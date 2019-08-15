@@ -114,13 +114,13 @@ def getLandmarks(dispMap, leftImg, objects, baseline, focal, depth_threshold=30,
 def landmark_filter(landmarks, img, restrictedWidthFactor = 20, depth_th = 25, area_th=100):
     landmarkFiltered = []
     n = restrictedWidthFactor
+    imgWidth = img.shape[1]
     for landmark in landmarks:
         # Gioi han chieu sau
         depth = landmark[1]
         if depth > depth_th:
             continue
         # Gioi han hai ben theo phuong x
-        imgWidth = img.shape[1]
         xmax = landmark[2][2]
         xmin = landmark[2][0]
         if xmax < imgWidth/n or xmin > imgWidth*(n-1)/n:

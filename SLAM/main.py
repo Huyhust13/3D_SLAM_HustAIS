@@ -49,7 +49,7 @@ if __name__ == "__main__":
     
     # Filter Params:
     _landmark_labels = ['traffic light','pole']  #'traffic sign',
-    _verticeMax = 6
+    _verticeMax = 8
     _restrictedWidthFactor = 20
     _depth_th = 30
     _area_th = 500
@@ -145,7 +145,7 @@ if __name__ == "__main__":
                 x_pv, y_pv = landmark[0:2]
                 measure_ = landmark[0:2]
                 x_po = rbPose[0] + x_pv*math.cos(rbPose[2])
-                y_po = rbPose[2] + y_pv*math.cos(rbPose[2])
+                y_po = rbPose[1] + y_pv*math.cos(rbPose[2])
                 landmark_estimate = [x_po, y_po]
                 writeVertex(vertexFilePath, "VERTEX_XY", _id, landmark_estimate)
                 writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, _id, measure_, info_edgeXY)
@@ -156,7 +156,7 @@ if __name__ == "__main__":
         # Ve landmark len leftImage
         imgLandmarkCam = drawLandmarks(leftImg, landmarks, textType='area')
         imgLandmarkVehicle = drawLandmarks(leftImg, landmarksPos)
-        imgObjects = drawObjects(leftImg, objects)
+        # imgObjects = drawObjects(leftImg, objects)
         
         # Show hinh anh. ()
         showImgs = 0
@@ -171,10 +171,10 @@ if __name__ == "__main__":
                     break
 
         # Luu anh
-        imgOutName_Obj = ".log/landmarked/" + args.city + indexImgs[i] + "objects.png"
+        # imgOutName_Obj = ".log/landmarked/" + args.city + indexImgs[i] + "objects.png"
         imgOutName_Cam = ".log/landmarked/" + args.city + indexImgs[i] + "landmarked_Cam.png"
         imgOutName_Vehicle = ".log/landmarked/" + args.city + indexImgs[i] + "landmarked_Vehicle.png"
-        cv2.imwrite(imgOutName_Obj, imgObjects)
+        # cv2.imwrite(imgOutName_Obj, imgObjects)
         cv2.imwrite(imgOutName_Cam, imgLandmarkCam)
         cv2.imwrite(imgOutName_Vehicle, imgLandmarkVehicle)
 
