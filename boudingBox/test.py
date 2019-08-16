@@ -8,8 +8,13 @@ parser = argparse.ArgumentParser(description="boundingbox")
 parser.add_argument("--name", help="name of data", default="aachen_000000_000019")
 args = parser.parse_args()
 
+# Cityscapes
 imgColor = args.name + "_leftImg8bit.png"
 labelFile = args.name + "_gtFine_polygons.json"
+
+# Apollo 
+# imgColor = args.name + "_bin.png"
+# labelFile = args.name + ".json"
 
 img = cv.imread(imgColor)
 

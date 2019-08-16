@@ -317,3 +317,13 @@ Compare:
 | (857:173) | 30.82421875 | 28.4937221269 |
 | (613:163) | 29.94921875 | 27.9347085202 |
 |  |  |  |
+
+### 16/8/2019:
+- Vấn đề xảy ra sau khi sử dụng bộ cityscapes:
+    - Ảnh quá thưa
+    - Nếu sử dụng tập videoDemo (ảnh liên tiếp) thì không có thông tin về odom, right image
+- Check lại tập Apollo:
+    - Bộ "road02_ins" có: 
+        - colorImage: chứa stereo camera (camera 5 và 6)
+        - Label: Chứa thông tin object detection.
+        **Đặc biệt ở file này chứa file json có thông tin bouding box object nhưng không có pole, traffic light... Tuy nhiên xem kĩ lại thì trong ảnh _*bin.png_ có chứa thông tin object detection có cả pole, traff light chứa trong giá trị pixel (81-83). Có thể trích xuất từ đây ra boudingbox**
