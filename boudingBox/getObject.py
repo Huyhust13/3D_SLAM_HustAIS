@@ -16,8 +16,9 @@ def readImg(imgPath):
     # dispMap = cv2.imread(disp_path, cv2.IMREAD_UNCHANGED).astype(np.float32)
     imgIn = cv2.imread(imgPath, 0)#.astype(np.float32)
     # ap dung cong thuc, chuyen tu anh disp sang anh depth
-    ids = [65, 66, 81, 82, 83]
-    objectFilter = lambda i: i if i in ids else 255
+    ids = [82]
+    # ids = [65, 66, 81, 82, 83]
+    objectFilter = lambda i: i if i in ids else 0
     convert = np.vectorize(objectFilter)
     imgOut = convert(imgIn)
     return imgOut
