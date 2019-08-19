@@ -1,0 +1,6 @@
+classes = 4
+train = Train.txt
+valid = Test.txt
+names = yolo.names
+backup = ./
+
