@@ -33,6 +33,7 @@ def writeJson(filePath, results):
 
 if __name__ == "__main__":
     # net = Detector(bytes("cfg/densenet201.cfg", encoding="utf-8"), bytes("densenet201.weights", encoding="utf-8"), 0, bytes("cfg/imagenet1k.data",encoding="utf-8"))
+    # pydarknet.set_cuda_device(0)
     net = loadmodel(args.modelPath)
     files = fileLoader(args.leftImgFolder)
         
@@ -51,7 +52,7 @@ if __name__ == "__main__":
             cv2.rectangle(img, (int(x - w / 2), int(y - h / 2)), (int(x + w / 2), int(y + h / 2)), (255, 0, 0), thickness=2)
             cv2.putText(img,str(cat.decode("utf-8")),(int(x),int(y)),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,0))
         
-            # cv2.imwrite("output/" + file[0:file.rfind("left")] + "detected.png", img)
+            cv2.imwrite("output/" + file[0:file.rfind("left")] + "detected.png", img)
             writeJson("boudingbox/"+file[0:file.rfind("left")] + "detected.json", results)
 
 

@@ -70,17 +70,16 @@ def getObjects(filePath, landmark_labels, verticeMax):
 def getObjectsYOLO(filePath, landmark_labels, score):
     # load json file
     with open(filePath, 'r') as f:
-        boundingboxs = json.load(f)
-        # boundingboxs = f.readline()
+        objectDetected = json.load(f)
     objects = []
-    print(boundingboxs)
-    list(boundingboxs)
-    for data in boundingboxs:
-        score = data["score"]
-        objects.append(data["boudingbox"])
+    for object_ in objectDetected:
+        x, y, w, h = object_["boundingbox"]
+        boundingbox = [int(x - w / 2), int(y - h / 2), int(x + w / 2), int(y + h / 2)]
+        if object_["object"] in landmark_labels:
+            objects.append(boundingbox)
     print(objects)
 
-getObjectsYOLO("/media/huynv/Data/14.ComputerVision/2.Code/3D_SLAM_HustAIS/objectDetectionYOLO/boudingbox/aachen_000000_000019_detected.json", "", 1)
+getObjectsYOLO("/media/huynv/Data/14.ComputerVision/2.Code/3D_SLAM_HustAIS/objectDetectionYOLO/boudingbox/stuttgart_00_000000_000001_detected.json", "", 1)
             # objects.append([xmin, ymin, xmax, ymax])
     # return objects
 
