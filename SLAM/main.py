@@ -9,7 +9,6 @@ from ultils import *
 from log_yaml import *
 from g2o_ultils import * 
 
-
 parser = argparse.ArgumentParser(description="graphBaseSLAM")
 parser.add_argument("--dataset", help="path to dataset", default="/media/huynv/My Passport/1.3DVision/2.Data/3DSlamData/")
 parser.add_argument("--city", help="name of city route", default="aachen")

@@ -67,6 +67,23 @@ def getObjects(filePath, landmark_labels, verticeMax):
             objects.append([xmin, ymin, xmax, ymax])
     return objects
 
+def getObjectsYOLO(filePath, landmark_labels, score):
+    # load json file
+    with open(filePath, 'r') as f:
+        boundingboxs = json.load(f)
+        # boundingboxs = f.readline()
+    objects = []
+    print(boundingboxs)
+    list(boundingboxs)
+    for data in boundingboxs:
+        score = data["score"]
+        objects.append(data["boudingbox"])
+    print(objects)
+
+getObjectsYOLO("/media/huynv/Data/14.ComputerVision/2.Code/3D_SLAM_HustAIS/objectDetectionYOLO/boudingbox/aachen_000000_000019_detected.json", "", 1)
+            # objects.append([xmin, ymin, xmax, ymax])
+    # return objects
+
 # Ham lay depth trung binh cua nhieu diem xung quanh (x,y)
 def averageValue(x, y, depth, numPx = 5):
     tmpSum = 0
