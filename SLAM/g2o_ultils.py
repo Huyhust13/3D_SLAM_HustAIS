@@ -44,8 +44,34 @@ def disc2pose(pose, pose_old):
     for i in range(len(pose)):
         disc[i] = pose[i] - pose_old[i]
     return disc
-# Ham ghi them dong vetex vao file vertex  
 
+# Ham tinh odom tu speed:
+def speed2odom(fileVehicle, timeStep, poseOld):
+    # load json file
+    with open(fileVehicle, 'r') as f:
+        vehicles = json.load(f)
+    speed = vehicles['speed']
+    yawRate = vehicles['yawRate']
+
+    ds = speed*timeStep
+    dtheta = yawRate*timeStep
+    # odom tu vi tri truoc
+    xOld, yOld, thetaOld = poseOld
+    x = xOld + ds*math.cos(thetaOld + dtheta/2)
+    y = yOld + ds*math.sin(thetaOld + dtheta/2)
+    theta = thetaOld + dtheta 
+    return [x, y, theta]
+
+# Ham tinh timeStep
+def getTimeStep(timestampPath, timeOld):
+    with open(timestampPath, 'r') as f:
+        time = f.read()
+    timeNow = int(time)*1e-9
+    return timeNow - timeOld
+    
+#region Write g2o file:
+# Ham ghi them dong vetex vao file vertex 
+# Hai ham nay su dung cho main.py 
 def writeVertex(vertexFilePath, tag, id_, current_estimate):
     vertexLine = "{} {} {}\n".format(tag, id_, (' '.join(map(str, current_estimate))))
     with open(vertexFilePath, 'a') as vertexWriter:
@@ -56,6 +82,18 @@ def writeEdge(edgeFilePath, tag, id1, id2, measurement, info_matrix):
     with open(edgeFilePath, 'a') as edgeWriter:
         edgeWriter.write(edgeLine)
         
+# Ham su dung cho main_v2.py
+# Ham add them dinh
+def addVertex(vertexFilePath, tag, id_, current_estimate):
+    vertexLine = "{} {} {}\n".format(tag, id_, (' '.join(map(str, current_estimate))))
+    with open(vertexFilePath, 'a') as vertexWriter:
+        vertexWriter.write(vertexLine)
+
+def addEdge(edgeFilePath, tag, id1, id2, measurement, info_matrix):
+    edgeLine = "{} {} {} {} {}\n".format(tag, id1, id2, (' '.join(map(str, measurement))), (' '.join(map(str, info_matrix))))
+    with open(edgeFilePath, 'a') as edgeWriter:
+        edgeWriter.write(edgeLine)
+
 def jointFile(g2oFilePath, vertexFilePath, edgeFilePath):
     with open(vertexFilePath) as vertexFile:
         with open(g2oFilePath, "a") as g2oFile:
@@ -66,6 +104,8 @@ def jointFile(g2oFilePath, vertexFilePath, edgeFilePath):
         with open(g2oFilePath, "a") as g2oFile:
             for line in edgeFile:
                 g2oFile.write(line)
+#endregion
+
 # Test
-# filePath = "/media/huynv/Data/14.ComputerVision/3.Data/3DSlamData/aachen_dev/vehicle/aachen_000000_000019_vehicle.json"        
-# getRobotPoseGPS(filePath)
+# fileVehicle = "/media/huynv/Data/14.ComputerVision/3.Data/3DSlamData/aachen_dev/vehicle/aachen_000000_000019_vehicle.json"        
+# getRobotPoseGPS(fileVehicle)

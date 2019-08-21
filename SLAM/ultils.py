@@ -34,54 +34,38 @@ def indexLoader(filepath, EXTENSIONS):
     files = [("_" + file.split('_')[1] + "_" + file.split("_")[2] + "_") for file in os.listdir(filepath) if is_type_file(file, EXTENSIONS)]
     files.sort()
     return files
+
+def indexLoader_v2(filepath, EXTENSIONS):
+    files = [("_" + file.split('_')[2] + "_" + file.split("_")[3] + "_") for file in os.listdir(filepath) if is_type_file(file, EXTENSIONS)]
+    files.sort()
+    return files
 #endregion 
 
 #region objects, landmarks
 # === Ham lay toa do pixel cua objects===
+# Ap dung loc: object, score
 # Input:
-#       - file *_gtFine_polygons.json
+#       - file *_detected.json
 # Output:
 #       - List toa do (x,y) cua nhieu diem tren moi object
 #       - preLandmaks: [[xmin, ymin, xmax, ymax]...]
-def getObjects(filePath, landmark_labels, verticeMax):
-    # load json file
-    with open(filePath, 'r') as f:
-        boundingboxs = json.load(f)
-    
-    objects = []
-    for i in range(len(boundingboxs["objects"])):
-        # Toa do dinh hinh da giac cua objects:
-        X = []
-        Y = []
-        for j in range(len(boundingboxs["objects"][i]["polygon"])):
-            X.append(boundingboxs["objects"][i]['polygon'][j][0])
-            Y.append(boundingboxs["objects"][i]['polygon'][j][1])
-        
-        xmax = max(X)
-        ymax = max(Y)
-        xmin = min(X)
-        ymin = min(Y)
-        label = str(boundingboxs["objects"][i]['label'])
-        
-        if ((label in landmark_labels) & (len(X)<verticeMax)):
-            objects.append([xmin, ymin, xmax, ymax])
-    return objects
-
 def getObjectsYOLO(filePath, landmark_labels, score):
     # load json file
-    with open(filePath, 'r') as f:
-        objectDetected = json.load(f)
-    objects = []
-    for object_ in objectDetected:
-        x, y, w, h = object_["boundingbox"]
-        boundingbox = [int(x - w / 2), int(y - h / 2), int(x + w / 2), int(y + h / 2)]
-        if object_["object"] in landmark_labels:
-            objects.append(boundingbox)
-    print(objects)
-
-getObjectsYOLO("/media/huynv/Data/14.ComputerVision/2.Code/3D_SLAM_HustAIS/objectDetectionYOLO/boudingbox/stuttgart_00_000000_000001_detected.json", "", 1)
-            # objects.append([xmin, ymin, xmax, ymax])
-    # return objects
+    try:
+        with open(filePath, 'r') as f:
+            objectDetected = json.load(f)
+        objects = []
+        for object_ in objectDetected:
+            x, y, w, h = object_["boundingbox"]
+            boundingbox = [int(x - w / 2), int(y - h / 2), int(x + w / 2), int(y + h / 2)]
+            # if object_["object"] in landmark_labels & object_["score"]>=score:
+            if object_["object"] in landmark_labels:
+                objects.append(boundingbox)
+    except:
+        objects = []
+    return objects
+# Test function
+# getObjectsYOLO("/media/huynv/Data/14.ComputerVision/2.Code/3D_SLAM_HustAIS/objectDetectionYOLO/boudingbox/stuttgart_00_000000_000001_detected.json", "", 1)
 
 # Ham lay depth trung binh cua nhieu diem xung quanh (x,y)
 def averageValue(x, y, depth, numPx = 5):
@@ -155,14 +139,53 @@ def area(_object):
     return (xmax - xmin)*(ymax - ymin)
 
 # Ham chuyen vi tri cua landmark doi voi odometry cua xe
-def getLandmarksPos(landmarks, x_ex, y_ex):
+def cvtLandmarksVehicle(landmarks, x_ex, y_ex):
     landmarksPos = []
     for landmark in landmarks:
         x_pv = landmark[1] + x_ex
         y_pv = landmark[0] + y_ex
         landmarksPos.append([x_pv, y_pv, landmark[2]])
     return landmarksPos
+#endregion 
+
+#region Object tracking
+# Ham simple object tracking
+# tra ve id cua landmark
+def checkLandmark(landmark_new, landmarks_mem, distance_th):
+    for landmark in landmarks_mem:
+        if isSameLandmark(landmark_new[2], landmark[3], distance_th):
+            return landmark[0]  
+    return 0 
+
+
+# format input: object[xmin, ymin, xmax, ymax]
+# Tra ve True neu la cung object, False neu khac object
+def isSameLandmark(object, object_old, distance_th):
+    cen_obj = getCentroid(object)
+    cen_obj_old = getCentroid(object_old)
+    distance = euclidDistance(cen_obj, cen_obj_old)
+    if distance <= distance_th:
+        return 1
+    else:
+        return 0
+
+# Ham tinh khoang cach
+def euclidDistance(point1, point2):
+    distance = math.sqrt(math.pow((point2[0]-point1[0]),2)+math.pow((point2[1]-point1[1]),2))
+    return distance
+
+# object[xmin, ymin, xmax, ymax]
+def getCentroid(object):
+    x = (object[0] + object[2])/2
+    y = (object[1] + object[3])/2
+    return [x, y]
 #endregion
+
+# Test 
+a = [1676, 394, 1686, 480]
+b = [1689, 397, 1698, 486]
+
+print(isSameLandmark(a, b, 100))
 
 #region draw
 # --------- DRAW FUNCTION ------------------------
@@ -180,7 +203,7 @@ def drawLandmarks(imgIn, landmarks,textType = 'landmark'):
         ymax = landmark[2][3]
         cv2.rectangle(imgOut, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
         if(textType=='landmark'):
-            cv2.putText(imgOut, "{} - [{:.2f} ; {:.2f}]".format(index, landmark[0], landmark[1]), (xmin+5,int((ymin+ymax)/2)), font, 1, (255,255,0), 2)
+            cv2.putText(imgOut, "{} - [{:.2f} ; {:.2f}]".format(landmark[3], landmark[0], landmark[1]), (xmin+5,int((ymin+ymax)/2)), font, 1, (255,255,0), 2)
         elif(textType=='area'):
             cv2.putText(imgOut, "{}-areaPx:{:.2f}".format(index, area(landmark[2]), landmark[1]), (xmin+5,int((ymin+ymax)/2)), font, 1, (255,255,0), 2)
             cv2.putText(imgOut, "   D:{:.2f}".format(landmark[1]), (xmin+5,int((ymin+ymax)/2+30)), font, 1, (255,255,0), 2)
