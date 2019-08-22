@@ -43,7 +43,7 @@ def indexLoader(filepath, EXTENSIONS):
 # Output:
 #       - List toa do (x,y) cua nhieu diem tren moi object
 #       - preLandmaks: [[xmin, ymin, xmax, ymax]...]
-def getObjects(filePath, landmark_labels, verticeMax):
+def getObjects_json(filePath, landmark_labels, verticeMax):
     # load json file
     with open(filePath, 'r') as f:
         boundingboxs = json.load(f)
@@ -66,6 +66,10 @@ def getObjects(filePath, landmark_labels, verticeMax):
         if ((label in landmark_labels) & (len(X)<verticeMax)):
             objects.append([xmin, ymin, xmax, ymax])
     return objects
+
+def getObjects_yolo(filepath):
+    pass
+
 
 # Ham lay depth trung binh cua nhieu diem xung quanh (x,y)
 def averageValue(x, y, depth, numPx = 5):

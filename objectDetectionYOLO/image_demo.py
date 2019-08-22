@@ -23,6 +23,9 @@ if __name__ == "__main__":
     # net = Detector(bytes("cfg/densenet201.cfg", encoding="utf-8"), bytes("densenet201.weights", encoding="utf-8"), 0, bytes("cfg/imagenet1k.data",encoding="utf-8"))
     net = loadmodel(args.modelPath)
     files = fileLoader(args.leftImgFolder)
+    if files is None:
+        print("Wrong path: " + str(args.leftImgFolder))
+
     for file in files:
         img = cv2.imread(args.leftImgFolder + file)
         img2 = Image(img)

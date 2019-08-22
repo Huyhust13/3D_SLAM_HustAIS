@@ -31,7 +31,8 @@ logger.debug(leftImgFolder)
 logger.debug(gtFine)
 logger.debug(dispFolder)
 
-# ====== MAIN ===============================
+#====== MAIN ===============================
+#TODO:
 # 1. Doc file gtFine .json de lay toa do diem
 # 2. Tinh toa do landmark tu disparity va thong tin tai 1
 #   2.1. Tinh depth: trung binh nhieu diem
@@ -99,7 +100,11 @@ if __name__ == "__main__":
             logger.error("Unexpected error:" + str(sys.exc_info()[0]))
             raise
 
-        objects = getObjects(gtFine + args.city.split("_")[0] + indexImgs[i] + "gtFine_polygons.json", _landmark_labels, _verticeMax )
+        # Using bouding box from json files
+        # objects = getObjects_json(gtFine + args.city.split("_")[0] + indexImgs[i] + "gtFine_polygons.json", _landmark_labels, _verticeMax )
+        #using Yolo
+        objects = getObjects_yolo(gtFine + args.city.split("_")[0] + indexImgs[i] + "detected.json")
+        
         logger.debug("\nobjects: " + str(objects))
 
         # get landmarks possition to Camera
