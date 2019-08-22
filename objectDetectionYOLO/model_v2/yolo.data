@@ -1,0 +1,6 @@
+classses = 1
+train = Train_pole.txt
+valid = Test_pole.txt
+names = model_v2/yolo.names
+backup = backup
+

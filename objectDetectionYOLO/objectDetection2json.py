@@ -4,6 +4,7 @@ from pydarknet import Detector, Image
 import cv2
 import argparse
 import os
+import json
 
 parser = argparse.ArgumentParser(description="ObjectDetectionYOLOv3")
 parser.add_argument("--modelPath", help="path to model folder", default="model/")
@@ -19,13 +20,26 @@ def fileLoader(filepath):
     files.sort()
     return files
 
+def writeJson(filePath, results):
+    r = dict()
+    a = []
+    for result in results:
+        r = {   "object": str(result[0].decode("utf-8")),
+                "score": result[1],
+                "boundingbox": result[2]}
+        a.append(r)
+    with open(filePath, 'w') as f:
+        json.dump(a, f, indent=4)
+
 if __name__ == "__main__":
     # net = Detector(bytes("cfg/densenet201.cfg", encoding="utf-8"), bytes("densenet201.weights", encoding="utf-8"), 0, bytes("cfg/imagenet1k.data",encoding="utf-8"))
+    # pydarknet.set_cuda_device(0)
     net = loadmodel(args.modelPath)
     files = fileLoader(args.leftImgFolder)
-    if files is None:
-        print("Wrong path: " + str(args.leftImgFolder))
-
+        
+    if not os.path.exists('boudingbox'):
+        os.makedirs('boudingbox')
+    
     for file in files:
         img = cv2.imread(args.leftImgFolder + file)
         img2 = Image(img)
@@ -36,9 +50,11 @@ if __name__ == "__main__":
         for cat, score, bounds in results:
             x, y, w, h = bounds
             cv2.rectangle(img, (int(x - w / 2), int(y - h / 2)), (int(x + w / 2), int(y + h / 2)), (255, 0, 0), thickness=2)
-            cv2.putText(img,"{} {:.2f}".format(cat.decode("utf-8"), score),(int(x),int(y)),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,0))
+            cv2.putText(img,str(cat.decode("utf-8")),(int(x),int(y)),cv2.FONT_HERSHEY_COMPLEX,1,(255,255,0))
         
-        cv2.imwrite("output/" + file[0:file.rfind("left")] + "detected.png", img)
+            cv2.imwrite("output/" + file[0:file.rfind("left")] + "detected.png", img)
+            writeJson("boudingbox/"+file[0:file.rfind("left")] + "detected.json", results)
+
 
 
     # cv2.imshow("output", img)

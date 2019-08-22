@@ -9,7 +9,6 @@ from ultils import *
 from log_yaml import *
 from g2o_ultils import * 
 
-
 parser = argparse.ArgumentParser(description="graphBaseSLAM")
 parser.add_argument("--dataset", help="path to dataset", default="/media/huynv/My Passport/1.3DVision/2.Data/3DSlamData/")
 parser.add_argument("--city", help="name of city route", default="aachen")
@@ -100,11 +99,8 @@ if __name__ == "__main__":
             logger.error("Unexpected error:" + str(sys.exc_info()[0]))
             raise
 
-        # Using bouding box from json files
-        # objects = getObjects_json(gtFine + args.city.split("_")[0] + indexImgs[i] + "gtFine_polygons.json", _landmark_labels, _verticeMax )
-        #using Yolo
-        objects = getObjects_yolo(gtFine + args.city.split("_")[0] + indexImgs[i] + "detected.json")
-        
+        # objects = getObjects(gtFine + args.city.split("_")[0] + indexImgs[i] + "gtFine_polygons.json", _landmark_labels, _verticeMax )
+        objects = getObjects(gtFine + args.city.split("_")[0] + indexImgs[i] + "gtFine_polygons.json", _landmark_labels, _verticeMax )
         logger.debug("\nobjects: " + str(objects))
 
         # get landmarks possition to Camera
