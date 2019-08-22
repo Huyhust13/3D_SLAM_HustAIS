@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import math
 import os
 import json
@@ -61,6 +63,18 @@ def speed2odom(fileVehicle, timeStep, poseOld):
     y = yOld + ds*math.sin(thetaOld + dtheta/2)
     theta = thetaOld + dtheta 
     return [x, y, theta]
+
+# Ham chuyen toa do 2D
+# rbPose[x_vo, y_vo, theta]: hệ tọa độ xe trong world
+# landmarkVehicle [x_pv, y_pv, boundingbox[]]
+# return: [x_po, y_po]
+def transform(rbPose, landmarkVehicle):
+    x_vo, y_vo, theta = rbPose
+    x_pv, y_pv = landmarkVehicle[0:2]
+    # x_po, y_po: toa do landmark trong htd world:
+    x_po = x_vo + x_pv*math.cos(theta) - y_pv*math.sin(theta)
+    y_po = y_vo + x_pv*math.sin(theta) + y_pv*math.cos(theta)
+    return [x_po, y_po]
 
 # Ham tinh timeStep
 def getTimeStep(timestampPath, timeOld):

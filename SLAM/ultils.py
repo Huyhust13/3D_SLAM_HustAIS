@@ -151,17 +151,23 @@ def cvtLandmarksVehicle(landmarks, x_ex, y_ex):
 #region Object tracking
 # Ham simple object tracking
 # tra ve id cua landmark
-def checkLandmark(landmark_new, landmarks_mem, distance_th):
-    for landmark in landmarks_mem:
-        if isSameLandmark(landmark_new[2], landmark[3], distance_th):
-            return landmark[0]  
+def checkLandmark(landmark_new, landmarks_cache, distance_th):
+    logger.debug("landmark_new: {}".format(landmark_new))
+    logger.debug("landmarks_cache: {}".format(landmarks_cache))
+    for cache in landmarks_cache:
+        logger.debug("cache: {}".format(cache))
+        # exit()
+        if cache is not None:
+            if isSameLandmark(landmark_new[2], cache[2], distance_th):
+                return cache[3]
+
     return 0 
 
 
 # format input: object[xmin, ymin, xmax, ymax]
 # Tra ve True neu la cung object, False neu khac object
-def isSameLandmark(object, object_old, distance_th):
-    cen_obj = getCentroid(object)
+def isSameLandmark(object_new, object_old, distance_th):
+    cen_obj = getCentroid(object_new)
     cen_obj_old = getCentroid(object_old)
     distance = euclidDistance(cen_obj, cen_obj_old)
     if distance <= distance_th:
@@ -182,10 +188,10 @@ def getCentroid(object):
 #endregion
 
 # Test 
-a = [1676, 394, 1686, 480]
-b = [1689, 397, 1698, 486]
+# a = [1676, 394, 1686, 480]
+# b = [1689, 397, 1698, 486]
 
-print(isSameLandmark(a, b, 100))
+# print(isSameLandmark(a, b, 100))
 
 #region draw
 # --------- DRAW FUNCTION ------------------------

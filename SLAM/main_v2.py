@@ -47,7 +47,7 @@ logger.debug(dispFolder)
 # 5. Thay đổi cơ chế ghi file g2o
 # 6. Lấy odom thật từ file vehicle và timestamp 
 # =========================================
-# FIXME: 1,2,3,
+# FIXME: all 
 
 if __name__ == "__main__":
     indexImgs = indexLoader_v2(leftImgFolder, ['.png'])
@@ -80,7 +80,9 @@ if __name__ == "__main__":
     rbPoseOld = [0,0,0]
     timeOld = 0
     landmarks_mem = []
-    distance_th = 100
+    # bien luu thong tin landmarks o buoc truoc
+    landmarks_cache = [] # [[{Xpv}, {Ypv}, {boundingbox[xmin, ymin, xmax, ymax]}, {g2o ID}],...]
+    distance_th = 50
     # Gia dinh
     info_edgeXY = [1.58114, 0, 1.58114]
     info_edgeSE2 = [100, 0, 0, 500, 0, 500]
@@ -149,15 +151,19 @@ if __name__ == "__main__":
             id_pose = _id
             _id += 1            
             for landmark in landmarkVehicles:
-                landmark.append(_id)
+                # add landmark kèm id vào cache 
+                temp = landmark.append(_id)
+                landmarks_cache.append(temp)
+
                 measure_ = landmark[0:2]
-                x_pv, y_pv = measure_
-                x_po = rbPose[0] + x_pv*math.cos(rbPose[2])
-                y_po = rbPose[2] + y_pv*math.cos(rbPose[2])
-                landmark_estimate = [x_po, y_po]
+                # x_pv, y_pv = measure_
+                # chuyển tọa độ 
+                # x_po = rbPose[0] + x_pv*math.cos(rbPose[2])
+                # y_po = rbPose[2] + y_pv*math.cos(rbPose[2])
+                # landmark_estimate = [x_po, y_po]
+                landmark_estimate = transform(rbPose, landmark)
                 writeVertex(vertexFilePath, "VERTEX_XY", _id, landmark_estimate)
                 writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, _id, measure_, info_edgeXY)
-                landmarks_mem.append([_id, landmark[0], landmark[1], landmark[2]])
                 _id += 1
         else:
             timeStep = getTimeStep(timestampPath, timeOld)
@@ -169,25 +175,29 @@ if __name__ == "__main__":
             writeEdge(edgeFilePath, "EDGE_SE2", id_pose, _id, measure_, info_edgeSE2)
             id_pose = _id
             _id += 1            
+            cache_tmp = []
             for landmark in landmarkVehicles:
                 measure_ = landmark[0:2]
-                x_pv, y_pv = measure_                
-                idOldLandmard = checkLandmark(landmark, landmarks_mem, distance_th)
+                # x_pv, y_pv = measure_                
+                idOldLandmard = checkLandmark(landmark, landmarks_cache, distance_th)
                 if idOldLandmard:
                     writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, idOldLandmard, measure_, info_edgeXY)
-                    logger.debug("idOldLandmard: {}".format(idOldLandmard))
+                    # add landmark kèm id vào cache 
                     landmark.append(idOldLandmard)
+                    cache_tmp.append(landmark)
                 else:
-                    x_po = rbPose[0] + x_pv*math.cos(rbPose[2])
-                    y_po = rbPose[2] + y_pv*math.cos(rbPose[2])
-                    landmark_estimate = [x_po, y_po]
+                    # x_po = rbPose[0] + x_pv*math.cos(rbPose[2])
+                    # y_po = rbPose[2] + y_pv*math.cos(rbPose[2])
+                    # landmark_estimate = [x_po, y_po]
+                    landmark_estimate = transform(rbPose, landmark)
                     writeVertex(vertexFilePath, "VERTEX_XY", _id, landmark_estimate)
                     writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, _id, measure_, info_edgeXY)
-                    landmarks_mem.append([_id, landmark[0], landmark[1], landmark[2]])
+                    # add landmark kèm id vào cache 
                     landmark.append(_id)
+                    cache_tmp.append(landmark)
                     _id += 1
-                logger.debug("landmark_id: {}".format(landmark))
-        
+            landmarks_cache = cache_tmp
+            logger.debug("landmarks_cache: {}".format(landmarks_cache))
         # Ve landmark len leftImage
         # imgLandmarkCam = drawLandmarks(leftImg, landmarks, textType='landmark')
         imgLandmarkVehicle = drawLandmarks(leftImg, landmarkVehicles)
