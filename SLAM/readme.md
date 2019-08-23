@@ -50,3 +50,23 @@ g2o file format:  https://github.com/RainerKuemmerle/g2o/wiki/File-Format-SLAM-2
 ### features:
 - Chưa có phát hiện landmark trùng
 - Cơ chế tạo file g2o chưa thể dùng nếu có landmark trùng.
+
+## 23 Aug, 2019:
+#TODO:
+- Tạo thêm bộ dữ liệu dài hơn (stuttgart_01)
+    - Chạy PSMNet:
+        - Tạo bộ left, right trên pc thầy Hạ
+        - Chuyển lên aisgpu2 để chạy PSMNet
+        - Sửa code sửa đuôi file kết quả trên aisgpu2
+        - Kéo kết quả về máy thầy Hạ
+        - Kéo về máy Huy
+    - Chạy object detection 
+        - Đẩy dữ liệu lên aisgpu4 
+        - Chạy object detection 
+        - Kéo file *_detected.json về máy 
+
+- Tăng bộ nhớ cache lên n frame
+    - Update vị trí landmark trong cache
+    - Gắn thêm chỉ số frame cho landmark, sau id -> []
+    - update chỉ số frame nếu có landmark trùng
+    - Nếu chỉ số frame > number_cache thì xóa.
