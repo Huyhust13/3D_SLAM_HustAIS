@@ -81,7 +81,9 @@ if __name__ == "__main__":
     timeOld = 0
     landmarks_mem = []
     # bien luu thong tin landmarks o buoc truoc
-    landmarks_cache = [] # [[{Xpv}, {Ypv}, {boundingbox[xmin, ymin, xmax, ymax]}, {g2o ID}],...]
+    number_cache = 3
+    cache_index = 0
+    landmark_caches = [] # [[{Xpv}, {Ypv}, {boundingbox[xmin, ymin, xmax, ymax]}, {g2o ID}, {cache_index}],...]
     distance_th = 50
     # Gia dinh
     info_edgeXY = [1.58114, 0, 1.58114]
@@ -103,8 +105,8 @@ if __name__ == "__main__":
         os.makedirs('landmarked')
     
     # dev  
-    # for i in range(30): 
-    for i in range(len(indexImgs)):
+    for i in range(30): 
+    # for i in range(len(indexImgs)):
         logger.info(args.dataFolder + indexImgs[i])
         # load left image:
         leftImgPath = leftImgFolder + args.city + indexImgs[i] + "leftImg8bit.png" 
@@ -152,9 +154,10 @@ if __name__ == "__main__":
             _id += 1            
             for landmark in landmarkVehicles:
                 # add landmark kèm id vào cache 
-                temp = landmark.append(_id)
-                landmarks_cache.append(temp)
-
+                landmark.append(_id)
+                # add cache_index vao sau landmark
+                landmark.append(cache_index)
+                landmark_caches.append(landmark)
                 measure_ = landmark[0:2]
                 # x_pv, y_pv = measure_
                 # chuyển tọa độ 
@@ -179,12 +182,15 @@ if __name__ == "__main__":
             for landmark in landmarkVehicles:
                 measure_ = landmark[0:2]
                 # x_pv, y_pv = measure_                
-                idOldLandmard = checkLandmark(landmark, landmarks_cache, distance_th)
+                idOldLandmard = checkLandmark(landmark, landmark_caches, distance_th)
                 if idOldLandmard:
                     writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, idOldLandmard, measure_, info_edgeXY)
                     # add landmark kèm id vào cache 
-                    landmark.append(idOldLandmard)
-                    cache_tmp.append(landmark)
+                    landmark.append(idOldLandmard[3])
+                    landmark.append(0)
+                    # cache_tmp.append(landmark)
+                    landmark_caches.append(landmark)
+                    landmark_caches.remove(idOldLandmard)
                 else:
                     # x_po = rbPose[0] + x_pv*math.cos(rbPose[2])
                     # y_po = rbPose[2] + y_pv*math.cos(rbPose[2])
@@ -194,10 +200,19 @@ if __name__ == "__main__":
                     writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, _id, measure_, info_edgeXY)
                     # add landmark kèm id vào cache 
                     landmark.append(_id)
-                    cache_tmp.append(landmark)
+                    landmark.append(0)
+                    # cache_tmp.append(landmark)
+                    landmark_caches.append(landmark)
                     _id += 1
-            landmarks_cache = cache_tmp
-            logger.debug("landmarks_cache: {}".format(landmarks_cache))
+                idx = 0
+                while idx < len(landmark_caches):
+                    if landmark_caches[idx][4] > number_cache:
+                        landmark_caches.remove(landmark_caches[idx])
+                    else:
+                        landmark_caches[idx][4] += 1
+                        idx += 1
+
+            logger.debug("landmark_caches: {}".format(landmark_caches))
         # Ve landmark len leftImage
         # imgLandmarkCam = drawLandmarks(leftImg, landmarks, textType='landmark')
         imgLandmarkVehicle = drawLandmarks(leftImg, landmarkVehicles)

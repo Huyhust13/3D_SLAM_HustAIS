@@ -159,7 +159,7 @@ def checkLandmark(landmark_new, landmarks_cache, distance_th):
         # exit()
         if cache is not None:
             if isSameLandmark(landmark_new[2], cache[2], distance_th):
-                return cache[3]
+                return cache
 
     return 0 
 
