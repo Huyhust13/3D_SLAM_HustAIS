@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 import os
 import os.path
 import argparse
@@ -149,18 +148,12 @@ if __name__ == "__main__":
             rbPoseOld = rbPose
             writeVertex(vertexFilePath, "VERTEX_SE2", _id, rbPose)
             id_pose = _id
-            _id += 1            
+            _id += 1
             for landmark in landmarkVehicles:
                 # add landmark kèm id vào cache 
                 temp = landmark.append(_id)
                 landmarks_cache.append(temp)
-
                 measure_ = landmark[0:2]
-                # x_pv, y_pv = measure_
-                # chuyển tọa độ 
-                # x_po = rbPose[0] + x_pv*math.cos(rbPose[2])
-                # y_po = rbPose[2] + y_pv*math.cos(rbPose[2])
-                # landmark_estimate = [x_po, y_po]
                 landmark_estimate = transform(rbPose, landmark)
                 writeVertex(vertexFilePath, "VERTEX_XY", _id, landmark_estimate)
                 writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, _id, measure_, info_edgeXY)
@@ -186,9 +179,6 @@ if __name__ == "__main__":
                     landmark.append(idOldLandmard)
                     cache_tmp.append(landmark)
                 else:
-                    # x_po = rbPose[0] + x_pv*math.cos(rbPose[2])
-                    # y_po = rbPose[2] + y_pv*math.cos(rbPose[2])
-                    # landmark_estimate = [x_po, y_po]
                     landmark_estimate = transform(rbPose, landmark)
                     writeVertex(vertexFilePath, "VERTEX_XY", _id, landmark_estimate)
                     writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, _id, measure_, info_edgeXY)
