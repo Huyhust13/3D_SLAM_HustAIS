@@ -95,18 +95,6 @@ def writeEdge(edgeFilePath, tag, id1, id2, measurement, info_matrix):
     edgeLine = "{} {} {} {} {}\n".format(tag, id1, id2, (' '.join(map(str, measurement))), (' '.join(map(str, info_matrix))))
     with open(edgeFilePath, 'a') as edgeWriter:
         edgeWriter.write(edgeLine)
-        
-# Ham su dung cho main_v2.py
-# Ham add them dinh
-def addVertex(vertexFilePath, tag, id_, current_estimate):
-    vertexLine = "{} {} {}\n".format(tag, id_, (' '.join(map(str, current_estimate))))
-    with open(vertexFilePath, 'a') as vertexWriter:
-        vertexWriter.write(vertexLine)
-
-def addEdge(edgeFilePath, tag, id1, id2, measurement, info_matrix):
-    edgeLine = "{} {} {} {} {}\n".format(tag, id1, id2, (' '.join(map(str, measurement))), (' '.join(map(str, info_matrix))))
-    with open(edgeFilePath, 'a') as edgeWriter:
-        edgeWriter.write(edgeLine)
 
 def jointFile(g2oFilePath, vertexFilePath, edgeFilePath):
     with open(vertexFilePath) as vertexFile:

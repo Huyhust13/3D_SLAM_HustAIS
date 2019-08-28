@@ -12,8 +12,8 @@ from g2o_ultils import *
 
 parser = argparse.ArgumentParser(description="graphBaseSLAM")
 parser.add_argument("--dataset", help="path to dataset", default="/media/huynv/Data/14.ComputerVision/3.Data/3DSlamData/")
-parser.add_argument("--city", help="name of city route", default="stuttgart_00")
-parser.add_argument("--dataFolder", help="name of data folder", default="stuttgart_00")
+parser.add_argument("--city", help="name of city route", default="stuttgart_01")
+parser.add_argument("--dataFolder", help="name of data folder", default="stuttgart_01")
 
 args = parser.parse_args()
 
@@ -104,8 +104,8 @@ if __name__ == "__main__":
         os.makedirs('landmarked')
     
     # dev  
-    for i in range(30): 
-    # for i in range(len(indexImgs)):
+    # for i in range(30): 
+    for i in range(len(indexImgs)):
         logger.info(args.dataFolder + indexImgs[i])
         # load left image:
         leftImgPath = leftImgFolder + args.city + indexImgs[i] + "leftImg8bit.png" 
@@ -178,7 +178,7 @@ if __name__ == "__main__":
                 # x_pv, y_pv = measure_                
                 idOldLandmard = checkLandmark(landmark, landmark_caches, distance_th)
                 if idOldLandmard:
-                    writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, idOldLandmard, measure_, info_edgeXY)
+                    writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, idOldLandmard[3], measure_, info_edgeXY)
                     # add landmark kèm id vào cache 
                     landmark.append(idOldLandmard[3])
                     landmark.append(0)

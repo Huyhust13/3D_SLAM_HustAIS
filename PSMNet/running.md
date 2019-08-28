@@ -1,3 +1,19 @@
+## Chạy trên máy mới:
+1. Yêu cầu
+- GPU > 6gb
+- Cuda GPU (8.0+)
+2. Các bước:
+- Cài đặt môi trường
+    - Thiết lập môi trường ảo
+        - Kiểm tra phiên bản pip: `pip -V`
+    - Cài:
+        `pip (or pip3) install --user virtualenv`
+    - Tạo môi trường ảo:
+        `virtualenv -p python3 envPy3Yolo`
+- Cài các package cần thiết:
+    `pip install -r requirements.txt`
+- Chạy file run_submission.py
+
 ## Trên pc cá nhân
 Môi trường: 
 - Ubuntu 18.04
@@ -11,3 +27,4 @@ Môi trường:
 |Khi chay tren PC cua Huy - `CUDA out of memory. Tried to allocate 352.00 MiB (GPU 0; 3.79 GiB total capacity; 1.70 GiB already allocated; 245.12 MiB free; 593.61 MiB cached)`| |Thieu dung luong GPU (recommend ~4.5GB)| Co the downscale anh dau vao xuong|
 |Laptop o Vien: cung bi `out of memory` khi chay bo du lieu cityscape co kich thuoc 2048x1014|ok|anh dau vao lon dan den can nhieu memory|down scale anh xuong 1024x512|
 |Su dung bo CityScape, down scale xuong con 1024x512 thi anh disparity con bi loi chua chinh xac|||
+

@@ -11,7 +11,7 @@ import sys
 parser = argparse.ArgumentParser(description="Images2Video")
 parser.add_argument("--imgFolder", help="path to images folder", default="landmarked/")
 parser.add_argument("--videoPath", help="path to video output folder", default="stuttgart_0")
-parser.add_argument("--videoName", help="path to video output folder", default="stuttgart_00_landmarked.mp4")
+parser.add_argument("--videoName", help="path to video output folder", default="stuttgart_01_landmarked.mp4")
 
 args = parser.parse_args()
 
@@ -45,7 +45,7 @@ if __name__ == "__main__":
         # cv2.putText(img, "fps: {}".format(fps), (5, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
         vidOut.write(img)
         complete = int(i*100/len(imageFiles))
-        s=str(complete) + "%"
+        s= "running... " + str(complete) + "%"
         sys.stdout.write(s)                     # just print
         sys.stdout.flush()                      # needed for flush when using \x08
         backspace(len(s))                       # back n chars
