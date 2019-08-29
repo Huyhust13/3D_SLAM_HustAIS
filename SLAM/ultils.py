@@ -67,8 +67,36 @@ def getObjectsYOLO(filePath, landmark_labels, score):
 # Test function
 # getObjectsYOLO("/media/huynv/Data/14.ComputerVision/2.Code/3D_SLAM_HustAIS/objectDetectionYOLO/boudingbox/stuttgart_00_000000_000001_detected.json", "", 1)
 
-def getObjects_yolo(filepath):
-    pass
+ # === Ham lay toa do pixel cua objects===
+ # Input:
+ #       - file *_gtFine_polygons.json
+ # Output:
+ #       - List toa do (x,y) cua nhieu diem tren moi object
+ #       - preLandmaks: [[xmin, ymin, xmax, ymax]...]
+def getObjects(filePath, landmark_labels, verticeMax):
+        # load json file
+    with open(filePath, 'r') as f:
+        boundingboxs = json.load(f)
+
+    objects = []
+    for i in range(len(boundingboxs["objects"])):
+        # Toa do dinh hinh da giac cua objects:
+        X = []
+        Y = []
+        for j in range(len(boundingboxs["objects"][i]["polygon"])):
+            X.append(boundingboxs["objects"][i]['polygon'][j][0])
+            Y.append(boundingboxs["objects"][i]['polygon'][j][1])
+        
+        xmax = max(X)
+        ymax = max(Y)
+        xmin = min(X)
+        ymin = min(Y)
+        label = str(boundingboxs["objects"][i]['label'])
+        
+        if ((label in landmark_labels) & (len(X)<verticeMax)):
+            objects.append([xmin, ymin, xmax, ymax])
+
+    return objects
 
 
 # Ham lay depth trung binh cua nhieu diem xung quanh (x,y)
@@ -233,3 +261,4 @@ def drawObjects(imgIn, objects):
         cv2.rectangle(imgOut, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
     return imgOut
 #endregion
+

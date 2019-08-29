@@ -10,7 +10,7 @@ from log_yaml import *
 from g2o_ultils import * 
 
 parser = argparse.ArgumentParser(description="graphBaseSLAM")
-parser.add_argument("--dataset", help="path to dataset", default="/media/huynv/My Passport/1.3DVision/2.Data/3DSlamData/")
+parser.add_argument("--dataset", help="path to dataset", default="/home/huyhv/Documents/3DSlamData/")
 parser.add_argument("--city", help="name of city route", default="aachen")
 args = parser.parse_args()
 
@@ -110,73 +110,77 @@ if __name__ == "__main__":
         landmarkFiltered = landmark_filter(landmarks,leftImg, _restrictedWidthFactor, _depth_th, _area_th)
 
         # Convert to Vehicel coordinate
-        landmarksPos = getLandmarksPos(landmarkFiltered, x_ex, y_ex)
+        landmarksPos = cvtLandmarksVehicle(landmarkFiltered, x_ex, y_ex)
         logger.debug("\nlandmarksPos" + str(landmarksPos))
 
         # ===== ghi vao file *.g20 ==============
         # x_pv, y_pv = landmarksPos[0:2]
 
         # Toa do gps tuyet doi cua vi tri dau tien
-        if i==0:
-            poseInit = getRobotPoseGPS(vehiclePath)
-            rbPose = [0,0,0]
-            rbPoseOld = rbPose
-            writeVertex(vertexFilePath, "VERTEX_SE2", _id, rbPose)
-            id_pose = _id
-            _id += 1
-            for landmark in landmarksPos:
-                x_pv, y_pv = landmark[0:2]
-                measure_ = landmark[0:2]
-                x_po = rbPose[0] + x_pv*math.cos(rbPose[2])
-                y_po = rbPose[2] + y_pv*math.cos(rbPose[2])
-                landmark_estimate = [x_po, y_po]
-                writeVertex(vertexFilePath, "VERTEX_XY", _id, landmark_estimate)
-                writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, _id, measure_, info_edgeXY)
-                _id += 1
-        else:
-            rbPose = odomFromGPS(getRobotPoseGPS(vehiclePath), poseInit)
-            writeVertex(vertexFilePath, "VERTEX_SE2", _id, rbPose)
-            measure_ = disc2pose(rbPose, rbPoseOld)
-            rbPoseOld = rbPose
-            writeEdge(edgeFilePath, "EDGE_SE2", id_pose, _id, measure_, info_edgeSE2)
-            id_pose = _id
-            _id += 1
-            # writeEdge(edgeFilePath, "EDGE_SE2", _id-1, _id, )
-            for landmark in landmarksPos:
-                x_pv, y_pv = landmark[0:2]
-                measure_ = landmark[0:2]
-                x_po = rbPose[0] + x_pv*math.cos(rbPose[2])
-                y_po = rbPose[1] + y_pv*math.cos(rbPose[2])
-                landmark_estimate = [x_po, y_po]
-                writeVertex(vertexFilePath, "VERTEX_XY", _id, landmark_estimate)
-                writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, _id, measure_, info_edgeXY)
-                _id += 1
+        # if i==0:
+        #     poseInit = getRobotPoseGPS(vehiclePath)
+        #     rbPose = [0,0,0]
+        #     rbPoseOld = rbPose
+        #     writeVertex(vertexFilePath, "VERTEX_SE2", _id, rbPose)
+        #     id_pose = _id
+        #     _id += 1
+        #     for landmark in landmarksPos:
+        #         x_pv, y_pv = landmark[0:2]
+        #         measure_ = landmark[0:2]
+        #         x_po = rbPose[0] + x_pv*math.cos(rbPose[2])
+        #         y_po = rbPose[2] + y_pv*math.cos(rbPose[2])
+        #         landmark_estimate = [x_po, y_po]
+        #         writeVertex(vertexFilePath, "VERTEX_XY", _id, landmark_estimate)
+        #         writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, _id, measure_, info_edgeXY)
+        #         _id += 1
+        # else:
+        #     rbPose = odomFromGPS(getRobotPoseGPS(vehiclePath), poseInit)
+        #     writeVertex(vertexFilePath, "VERTEX_SE2", _id, rbPose)
+        #     measure_ = disc2pose(rbPose, rbPoseOld)
+        #     rbPoseOld = rbPose
+        #     writeEdge(edgeFilePath, "EDGE_SE2", id_pose, _id, measure_, info_edgeSE2)
+        #     id_pose = _id
+        #     _id += 1
+        #     # writeEdge(edgeFilePath, "EDGE_SE2", _id-1, _id, )
+        #     for landmark in landmarksPos:
+        #         x_pv, y_pv = landmark[0:2]
+        #         measure_ = landmark[0:2]
+        #         x_po = rbPose[0] + x_pv*math.cos(rbPose[2])
+        #         y_po = rbPose[1] + y_pv*math.cos(rbPose[2])
+        #         landmark_estimate = [x_po, y_po]
+        #         writeVertex(vertexFilePath, "VERTEX_XY", _id, landmark_estimate)
+        #         writeEdge(edgeFilePath, "EDGE_SE2_XY", id_pose, _id, measure_, info_edgeXY)
+        #         _id += 1
 
-        # logger.info("rbPose: " + str(rbPose))
+        logger.info("landmarksPos: " + str(landmarksPos))
+        # exit()
         
         # Ve landmark len leftImage
         imgLandmarkCam = drawLandmarks(leftImg, landmarks, textType='area')
-        imgLandmarkVehicle = drawLandmarks(leftImg, landmarksPos)
-        # imgObjects = drawObjects(leftImg, objects)
+        imgLandmarkVehicle = drawLandmarks(leftImg, landmarksPos, textType='area')
+        imgObjects = drawObjects(leftImg, objects)
         
         # Show hinh anh. ()
         showImgs = 0
         if showImgs:
-            cv2.namedWindow("Landmark Camera", flags=cv2.WINDOW_NORMAL)
+            cv2.namedWindow("Objects", flags=cv2.WINDOW_NORMAL)
             cv2.namedWindow("Landmark Vehicle", flags=cv2.WINDOW_NORMAL)
+            cv2.namedWindow("Landmark Cam", flags=cv2.WINDOW_NORMAL)
             while True:
-                cv2.imshow("Landmark Camera", imgLandmarkCam)
+                cv2.imshow("Objects", imgObjects)
+                cv2.imshow("Landmark Cam", imgLandmarkCam)
                 cv2.imshow("Landmark Vehicle", imgLandmarkVehicle)
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord("q"):
                     break
 
         # Luu anh
-        # imgOutName_Obj = ".log/landmarked/" + args.city + indexImgs[i] + "objects.png"
+        imgOutName_Obj = ".log/landmarked/" + args.city + indexImgs[i] + "objects.png"
         imgOutName_Cam = ".log/landmarked/" + args.city + indexImgs[i] + "landmarked_Cam.png"
         imgOutName_Vehicle = ".log/landmarked/" + args.city + indexImgs[i] + "landmarked_Vehicle.png"
-        # cv2.imwrite(imgOutName_Obj, imgObjects)
+        cv2.imwrite(imgOutName_Obj, imgObjects)
         cv2.imwrite(imgOutName_Cam, imgLandmarkCam)
         cv2.imwrite(imgOutName_Vehicle, imgLandmarkVehicle)
+        exit()
 
-    jointFile(g2oFilePath, vertexFilePath, edgeFilePath)
+    # jointFile(g2oFilePath, vertexFilePath, edgeFilePath)

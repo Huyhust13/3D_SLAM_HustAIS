@@ -38,7 +38,8 @@ def openfile(path):
 if __name__ == '__main__':
 
 	#Path to dataset folder
-	path = "/media/tungngo/DATA/Chuyen_mon/Mechatronics/Introduction to Mobile Robotics/GraphSLAM/vehicle_trainextra/vehicle/train_extra/nuremberg/"
+	# path = "/media/tungngo/DATA/Chuyen_mon/Mechatronics/Introduction to Mobile Robotics/GraphSLAM/vehicle_trainextra/vehicle/train_extra/nuremberg/"
+	path = "/home/huyhv/Documents/3DSlamData/stuttgart_01/vehicle/"
 
 	print('open')
 	#Read files and set files in order
@@ -88,7 +89,7 @@ if __name__ == '__main__':
 	del head_a_t[0]
 
 	# Write data to g2o file
-	file_odom = open(path + "result/odom_result.g2o", 'w')
+	file_odom = open("stuttgard_01.g2o", 'w')
 	s = " "
 	for i in range(len(head_a_t)):
 		
